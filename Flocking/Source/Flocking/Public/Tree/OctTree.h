@@ -55,7 +55,7 @@ class FLOCKING_API UOctTree : public UObject
 public:
 	//a list of all the nodes that were created and added to this part of the tree
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Tree")
-	TArray<FPoint*> Nodes;
+	TArray<FPoint> Nodes;
 
 	//Keeps a list of all the children that are created once this upper part of the tree is filledd
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Tree")
@@ -71,16 +71,16 @@ public:
 
 	//used for the initial size of the parent tree
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Tree")
-	FRect* Boundary;
+	FRect Boundary;
 
 	//used to display the parent rect and all its children, including its points
 	void Display();
 	
 	//is used to fill up the parent node and if it becomes filled will then call the Divide function
-	void Insert(FPoint ToBeAdded);
+	bool Insert(FPoint ToBeAdded);
 
 	//Used to find all nodes that interset with the Range, and returns a collection of all Found nodes
-	void Query(FRect* Range, TArray<FPoint*> &Found);
+	void Query(FRect Range, TArray<FPoint> &Found);
 
 private:
 	//used when an insert is needed and the current parent is filled
