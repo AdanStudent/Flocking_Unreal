@@ -53,6 +53,8 @@ class FLOCKING_API UOctTree : public UObject
 	GENERATED_BODY()
 
 public:
+	UOctTree();
+
 	//a list of all the nodes that were created and added to this part of the tree
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Tree")
 	TArray<FPoint> Nodes;

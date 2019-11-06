@@ -6,6 +6,8 @@
 #include "GameFramework/Actor.h"
 #include "Spawner.generated.h"
 
+class UOctTree;
+
 UCLASS()
 class FLOCKING_API ASpawner : public AActor
 {
@@ -16,7 +18,7 @@ public:
 	ASpawner();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawning")
-	class UOctTree* Tree;
+	UOctTree* Tree;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawning")
 	TArray<AActor*> SpawnedUnits;

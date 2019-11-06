@@ -21,6 +21,17 @@ bool FRect::Intersects(FRect Range)
 	return false;
 }
 
+UOctTree::UOctTree()
+{
+	Capacity = 4;
+	bIsFilled = false;
+	
+	Boundary.CenterLocation = FVector::ZeroVector;
+
+	float size = 2000;
+	Boundary.Size = FVector(size);
+}
+
 void UOctTree::Display()
 {
 	if (UWorld* World = GetWorld())
