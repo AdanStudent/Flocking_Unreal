@@ -11,7 +11,8 @@ ASpawner::ASpawner()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-	Tree = NewObject<UOctTree>(this, UOctTree::StaticClass(), FName("Tree"));
+
+	auto t = Tree->Boundary;
 }
 
 void ASpawner::SpawnActors()

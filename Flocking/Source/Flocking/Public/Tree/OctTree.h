@@ -23,6 +23,12 @@ public:
 	//keeping a reference of the object that it is representing
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Point")
 	UObject* Data;
+
+	FPoint()
+	{
+		Location = FVector::ZeroVector;
+		Data = nullptr;
+	};
 };
 
 USTRUCT(BlueprintType)
@@ -44,6 +50,12 @@ public:
 	
 	//Used to check if another Rect intersects with this one
 	bool Intersects(FRect Range);
+
+	FRect()
+	{
+		CenterLocation = FVector::ZeroVector;
+		Size = FVector::ZeroVector;
+	};
 
 };
 
