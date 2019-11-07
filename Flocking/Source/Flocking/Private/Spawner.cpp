@@ -4,6 +4,7 @@
 #include "..\Public\Spawner.h"
 #include "Engine/World.h"
 #include "../Public/Tree/OctTree.h"
+#include "DrawDebugHelpers.h"
 
 
 // Sets default values
@@ -29,7 +30,7 @@ void ASpawner::SpawnActors()
 			FActorSpawnParameters sParameters;
 			sParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 
-			float range = Rand.FRandRange(0.f, 2000.f);
+			float range = Rand.FRandRange(1.f, 2000.f);
 
 			FVector Loc = Rand.GetUnitVector() * range;
 
@@ -58,6 +59,9 @@ void ASpawner::BeginPlay()
 	
 	SpawnActors();
 	Tree->Display();
+
+	//DrawDebugBox(GetWorld(), FVector::ZeroVector, FVector(2000), FColor::Red, true, -1.f, 0, 2);
+
 	
 }
 

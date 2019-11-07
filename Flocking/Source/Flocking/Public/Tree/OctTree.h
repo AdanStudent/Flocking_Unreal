@@ -59,7 +59,7 @@ public:
 
 };
 
-UCLASS()
+UCLASS(EditInlineNew)
 class FLOCKING_API UOctTree : public UObject
 {
 	GENERATED_BODY()
@@ -72,7 +72,7 @@ public:
 	TArray<FPoint> Nodes;
 
 	//Keeps a list of all the children that are created once this upper part of the tree is filledd
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Tree")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Tree", Instanced)
 	TArray<UOctTree*> Children;
 
 	//tracks what is the limit of how many point can be in each child

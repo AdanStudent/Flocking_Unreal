@@ -36,7 +36,7 @@ void UOctTree::Display()
 {
 	if (UWorld* World = GetWorld())
 	{
-		DrawDebugBox(World, Boundary.CenterLocation, Boundary.Size, FColor::Red);
+		DrawDebugBox(GetWorld(), Boundary.CenterLocation, Boundary.Size, FColor::Red, true, -1.f, 0, 5);
 
 		if (bIsFilled)
 		{
@@ -49,7 +49,7 @@ void UOctTree::Display()
 
 		for (int32 i = 0; i < Nodes.Num(); i++)
 		{
-			DrawDebugPoint(World, Nodes[i].Location, 5, FColor::Green);
+			DrawDebugPoint(World, Nodes[i].Location, 5, FColor::Green, true, -1);
 		}
 	}
 }
@@ -77,14 +77,14 @@ bool UOctTree::Insert(FPoint ToBeAdded)
 		}
 
 		//check each subdivision to see if it can be inserted
-		for (int32 i = 0; i < Children.Num(); i++)
+		
+		if (Children[0]->Insert(ToBeAdded) || Children[1]->Insert(ToBeAdded) || Children[2]->Insert(ToBeAdded) || Children[3]->Insert(ToBeAdded) || 
+			Children[4]->Insert(ToBeAdded) || Children[5]->Insert(ToBeAdded) || Children[6]->Insert(ToBeAdded) || Children[7]->Insert(ToBeAdded))
 		{
-			if (Children[i]->Insert(ToBeAdded))
-			{
-				//once one is found return true;
-				return true;
-			}
+			//once one is found return true;
+			return true;
 		}
+		
 	}
 
 	return false;
@@ -97,4 +97,13 @@ void UOctTree::Query(FRect Range, TArray<FPoint> &Found)
 
 void UOctTree::Divide()
 {
+
+	for (int32 i = 0; i < 8; i++)
+	{
+		UOctTree* Child = NewObject<UOctTree>();
+		Children.Add(Child);
+	}
+
+	
+	bIsFilled = true;
 }
