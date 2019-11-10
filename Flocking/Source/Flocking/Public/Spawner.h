@@ -21,6 +21,10 @@ public:
 	UOctTree* Tree;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawning")
+	TArray<UOctTree*> TempTrees;
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawning")
 	TArray<AActor*> SpawnedUnits;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawning")

@@ -13,8 +13,13 @@ ASpawner::ASpawner()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	Tree = CreateDefaultSubobject<UOctTree>(TEXT("Tree"));
+	Tree->Boundary.Size = FVector(2000);
 
-	auto t = Tree->Boundary;
+	for (int32 i = 0; i < 200; i++)
+	{
+		UOctTree* Temp = CreateDefaultSubobject<UOctTree>("Child");
+		TempTrees.Add(Temp);
+	}
 }
 
 void ASpawner::SpawnActors()
@@ -59,8 +64,16 @@ void ASpawner::BeginPlay()
 	
 	SpawnActors();
 	Tree->Display();
+	int count = Tree->HowManyChildren();
 
-	//DrawDebugBox(GetWorld(), FVector::ZeroVector, FVector(2000), FColor::Red, true, -1.f, 0, 2);
+	UE_LOG(LogTemp, Warning, TEXT("Number of children: %d"), count);
+
+
+	//DrawDebugBox(GetWorld(), FVector(1000), FVector(1000), FColor::Black, true, -1.f, 0, 10);
+	//DrawDebugBox(GetWorld(), FVector(-1000), FVector(1000), FColor::Black, true, -1.f, 0, 10);
+
+	//DrawDebugBox(GetWorld(), FVector::ZeroVector, FVector(2000), FColor::Red, true, -1.f, 0, 10);
+
 
 	
 }

@@ -28,8 +28,14 @@ UOctTree::UOctTree()
 	
 	Boundary.CenterLocation = FVector::ZeroVector;
 
-	float size = 2000;
-	Boundary.Size = FVector(size);
+	//for (int32 i = 0; i < 8; i++)
+	//{
+	//	UOctTree* Child = CreateDefaultSubobject<UOctTree>("Child");
+	//	Child->Capacity = Capacity;
+	//	Child->Boundary.Size = FVector(Boundary.Size/ 2);
+	//	//Child->Boundary.CenterLocation = FVector()
+	//	Children.Add(Child);
+	//}
 }
 
 void UOctTree::Display()
@@ -95,15 +101,81 @@ void UOctTree::Query(FRect Range, TArray<FPoint> &Found)
 {
 }
 
-void UOctTree::Divide()
+int UOctTree::HowManyChildren()
 {
 
-	for (int32 i = 0; i < 8; i++)
+	if (Children.Num() < 1)
 	{
-		UOctTree* Child = NewObject<UOctTree>();
-		Children.Add(Child);
+		return 1;
+	}
+	int count = 1;
+	for (int i = 0; i < Children.Num(); i++)
+	{
+		count += Children[i]->HowManyChildren();
 	}
 
+	return count;
+}
+
+void UOctTree::Divide()
+{
+	FVector NewSize = Boundary.Size / 2;
+
+	//Top North-East
+	UOctTree* TNE = NewObject<UOctTree>();
+	TNE->Capacity = Capacity;
+	TNE->Boundary.Size = NewSize;
+	TNE->Boundary.CenterLocation = NewSize;
+	Children.Add(TNE);
+
+	//Top South-East
+	UOctTree* TSE = NewObject<UOctTree>();
+	TSE->Capacity = Capacity;
+	TSE->Boundary.Size = NewSize;
+	TSE->Boundary.CenterLocation = FVector(-NewSize.X, NewSize.Y, NewSize.Z);
+	Children.Add(TSE);
+
+	//Top South-West
+	UOctTree* TSW = NewObject<UOctTree>();
+	TSW->Capacity = Capacity;
+	TSW->Boundary.Size = NewSize;
+	TSW->Boundary.CenterLocation = FVector(-NewSize.X, -NewSize.Y, NewSize.Z);
+	Children.Add(TSW);
+
+	//Top North-West
+	UOctTree* TNW = NewObject<UOctTree>();
+	TNW->Capacity = Capacity;
+	TNW->Boundary.Size = NewSize;
+	TNW->Boundary.CenterLocation = FVector(NewSize.X, -NewSize.Y, NewSize.Z);
+	Children.Add(TNW);
+
+	//Bottom North-East
+	UOctTree* BNE = NewObject<UOctTree>();
+	BNE->Capacity = Capacity;
+	BNE->Boundary.Size = NewSize;
+	BNE->Boundary.CenterLocation = FVector(NewSize.X, NewSize.Y, -NewSize.Z);
+	Children.Add(BNE);
+
+	//Bottom South-East
+	UOctTree* BSE = NewObject<UOctTree>();
+	BSE->Capacity = Capacity;
+	BSE->Boundary.Size = NewSize;
+	BSE->Boundary.CenterLocation = FVector(-NewSize.X, NewSize.Y, -NewSize.Z);
+	Children.Add(BSE);
+
+	//Bottom South-West
+	UOctTree* BSW = NewObject<UOctTree>();
+	BSW->Capacity = Capacity;
+	BSW->Boundary.Size = NewSize;
+	BSW->Boundary.CenterLocation = FVector(-NewSize);
+	Children.Add(BSW);
+
+	//Bottom North-West
+	UOctTree* BNW = NewObject<UOctTree>();
+	BNW->Capacity = Capacity;
+	BNW->Boundary.Size = NewSize;
+	BNW->Boundary.CenterLocation = FVector(NewSize.X, -NewSize.Y, -NewSize.Z);
+	Children.Add(BNW);
 	
 	bIsFilled = true;
 }

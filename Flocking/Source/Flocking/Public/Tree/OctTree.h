@@ -67,6 +67,8 @@ class FLOCKING_API UOctTree : public UObject
 public:
 	UOctTree();
 
+	UOctTree(int32 Cap, FRect Boundary);
+
 	//a list of all the nodes that were created and added to this part of the tree
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Tree")
 	TArray<FPoint> Nodes;
@@ -95,6 +97,8 @@ public:
 
 	//Used to find all nodes that interset with the Range, and returns a collection of all Found nodes
 	void Query(FRect Range, TArray<FPoint> &Found);
+
+	int HowManyChildren();
 
 private:
 	//used when an insert is needed and the current parent is filled
