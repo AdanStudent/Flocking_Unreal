@@ -12,12 +12,17 @@ ASpawner::ASpawner()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
+	//some text here
 	Tree = CreateDefaultSubobject<UOctTree>(TEXT("Tree"));
+	Tree->SpawnerRef = this;
 	Tree->Boundary.Size = FVector(2000);
 
+	//creating a list of empty OctTree's to be able to call from when a divide is called
 	for (int32 i = 0; i < 200; i++)
 	{
-		UOctTree* Temp = CreateDefaultSubobject<UOctTree>("Child");
+		FName name = FName("Child", i);
+		UOctTree* Temp = CreateDefaultSubobject<UOctTree>(name);
 		TempTrees.Add(Temp);
 	}
 }
