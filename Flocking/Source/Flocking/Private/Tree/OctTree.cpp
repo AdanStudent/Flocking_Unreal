@@ -3,7 +3,7 @@
 
 #include "..\..\Public\Tree\OctTree.h"
 #include "DrawDebugHelpers.h"
-
+#include "Public\Spawner.h"
 
 bool FRect::Contains(FPoint Node)
 {
@@ -42,10 +42,12 @@ void UOctTree::Display()
 {
 	if (UWorld* World = GetWorld())
 	{
-		DrawDebugBox(GetWorld(), Boundary.CenterLocation, Boundary.Size, FColor::Red, true, -1.f, 0, 5);
 
 		if (bIsFilled)
 		{
+			UE_LOG(LogTemp, Warning, TEXT("%s"), *GetName())
+			DrawDebugBox(GetWorld(), Boundary.CenterLocation, Boundary.Size, FColor::Red, true, -1.f, 0, 5);
+
 			for (int32 i = 0; i < Children.Num(); i++)
 			{
 				Children[i]->Display();
@@ -83,7 +85,7 @@ bool UOctTree::Insert(FPoint ToBeAdded)
 		}
 
 		//check each subdivision to see if it can be inserted
-		
+		//UE_LOG(LogTemp, Warning, TEXT(""))
 		if (Children[0]->Insert(ToBeAdded) || Children[1]->Insert(ToBeAdded) || Children[2]->Insert(ToBeAdded) || Children[3]->Insert(ToBeAdded) || 
 			Children[4]->Insert(ToBeAdded) || Children[5]->Insert(ToBeAdded) || Children[6]->Insert(ToBeAdded) || Children[7]->Insert(ToBeAdded))
 		{
@@ -108,6 +110,7 @@ int UOctTree::HowManyChildren()
 	{
 		return 1;
 	}
+
 	int count = 1;
 	for (int i = 0; i < Children.Num(); i++)
 	{
@@ -119,63 +122,66 @@ int UOctTree::HowManyChildren()
 
 void UOctTree::Divide()
 {
+
+	if (!SpawnerRef || SpawnerRef->TempTrees.Num() < 7)
+	{
+		return;
+	}
+
 	FVector NewSize = Boundary.Size / 2;
 
 	//Top North-East
-	UOctTree* TNE = NewObject<UOctTree>();
-	TNE->Capacity = Capacity;
-	TNE->Boundary.Size = NewSize;
+	auto* TNE = CreateChild(NewSize);
 	TNE->Boundary.CenterLocation = NewSize;
 	Children.Add(TNE);
 
 	//Top South-East
-	UOctTree* TSE = NewObject<UOctTree>();
-	TSE->Capacity = Capacity;
-	TSE->Boundary.Size = NewSize;
+	auto* TSE = CreateChild(NewSize);
 	TSE->Boundary.CenterLocation = FVector(-NewSize.X, NewSize.Y, NewSize.Z);
 	Children.Add(TSE);
 
 	//Top South-West
-	UOctTree* TSW = NewObject<UOctTree>();
-	TSW->Capacity = Capacity;
-	TSW->Boundary.Size = NewSize;
+	auto* TSW = CreateChild(NewSize);
 	TSW->Boundary.CenterLocation = FVector(-NewSize.X, -NewSize.Y, NewSize.Z);
 	Children.Add(TSW);
 
 	//Top North-West
-	UOctTree* TNW = NewObject<UOctTree>();
-	TNW->Capacity = Capacity;
-	TNW->Boundary.Size = NewSize;
+	auto* TNW = CreateChild(NewSize);
 	TNW->Boundary.CenterLocation = FVector(NewSize.X, -NewSize.Y, NewSize.Z);
 	Children.Add(TNW);
 
 	//Bottom North-East
-	UOctTree* BNE = NewObject<UOctTree>();
-	BNE->Capacity = Capacity;
-	BNE->Boundary.Size = NewSize;
+	auto* BNE = CreateChild(NewSize);
 	BNE->Boundary.CenterLocation = FVector(NewSize.X, NewSize.Y, -NewSize.Z);
 	Children.Add(BNE);
 
 	//Bottom South-East
-	UOctTree* BSE = NewObject<UOctTree>();
-	BSE->Capacity = Capacity;
-	BSE->Boundary.Size = NewSize;
+	auto* BSE = CreateChild(NewSize);
 	BSE->Boundary.CenterLocation = FVector(-NewSize.X, NewSize.Y, -NewSize.Z);
 	Children.Add(BSE);
 
 	//Bottom South-West
-	UOctTree* BSW = NewObject<UOctTree>();
-	BSW->Capacity = Capacity;
-	BSW->Boundary.Size = NewSize;
+	auto* BSW = CreateChild(NewSize);
 	BSW->Boundary.CenterLocation = FVector(-NewSize);
 	Children.Add(BSW);
 
 	//Bottom North-West
-	UOctTree* BNW = NewObject<UOctTree>();
-	BNW->Capacity = Capacity;
-	BNW->Boundary.Size = NewSize;
+	auto* BNW = CreateChild(NewSize);
 	BNW->Boundary.CenterLocation = FVector(NewSize.X, -NewSize.Y, -NewSize.Z);
 	Children.Add(BNW);
 	
 	bIsFilled = true;
+}
+
+UOctTree* UOctTree::CreateChild(const FVector &NewSize)
+{
+	auto* Child = SpawnerRef->TempTrees.Pop();
+	Child->SpawnerRef = SpawnerRef;
+	Child->Capacity = Capacity;
+	Child->Boundary.Size = NewSize;
+
+	if (!Child)
+		return nullptr;
+	
+	return Child;
 }

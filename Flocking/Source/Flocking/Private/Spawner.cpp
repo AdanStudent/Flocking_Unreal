@@ -19,7 +19,7 @@ ASpawner::ASpawner()
 	Tree->Boundary.Size = FVector(2000);
 
 	//creating a list of empty OctTree's to be able to call from when a divide is called
-	for (int32 i = 0; i < 200; i++)
+	for (int32 i = 0; i < 35000; i++)
 	{
 		FName name = FName("Child", i);
 		UOctTree* Temp = CreateDefaultSubobject<UOctTree>(name);
@@ -65,7 +65,6 @@ void ASpawner::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	//Tree->Setup();
 	
 	SpawnActors();
 	Tree->Display();

@@ -107,6 +107,8 @@ private:
 	//used when an insert is needed and the current parent is filled
 	void Divide();
 
+	UOctTree* CreateChild(const FVector & NewSize);
+
 
 
 
