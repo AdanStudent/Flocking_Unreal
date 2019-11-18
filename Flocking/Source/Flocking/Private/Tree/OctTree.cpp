@@ -36,29 +36,36 @@ UOctTree::UOctTree()
 	//	//Child->Boundary.CenterLocation = FVector()
 	//	Children.Add(Child);
 	//}
+
+	//NewMapWorld = GetWorld();
 }
 
 void UOctTree::Display()
 {
-	if (UWorld* World = GetWorld())
+	if (NewMapWorld)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("%s"), *GetName())
 
-		if (bIsFilled)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("%s"), *GetName())
-			DrawDebugBox(GetWorld(), Boundary.CenterLocation, Boundary.Size, FColor::Red, true, -1.f, 0, 5);
-
-			for (int32 i = 0; i < Children.Num(); i++)
-			{
-				Children[i]->Display();
-			}
-		}
-
+		DrawDebugBox(NewMapWorld, Boundary.CenterLocation, Boundary.Size, FColor::Red, true, -1.f, 0, 5);
 
 		for (int32 i = 0; i < Nodes.Num(); i++)
 		{
-			DrawDebugPoint(World, Nodes[i].Location, 5, FColor::Green, true, -1);
+			DrawDebugPoint(NewMapWorld, Nodes[i].Location, 5, FColor::Green, true, -1);
 		}
+
+		if (bIsFilled)
+		{
+			TNE->Display();
+			TSE->Display();
+			TSW->Display();
+			TNW->Display();
+			BNE->Display();
+			BSE->Display();
+			BSW->Display();
+			BNW->Display();
+		}
+
+
 	}
 }
 
@@ -86,8 +93,8 @@ bool UOctTree::Insert(FPoint ToBeAdded)
 
 		//check each subdivision to see if it can be inserted
 		//UE_LOG(LogTemp, Warning, TEXT(""))
-		if (Children[0]->Insert(ToBeAdded) || Children[1]->Insert(ToBeAdded) || Children[2]->Insert(ToBeAdded) || Children[3]->Insert(ToBeAdded) || 
-			Children[4]->Insert(ToBeAdded) || Children[5]->Insert(ToBeAdded) || Children[6]->Insert(ToBeAdded) || Children[7]->Insert(ToBeAdded))
+		if (TNE->Insert(ToBeAdded) || TSE->Insert(ToBeAdded) || TSW->Insert(ToBeAdded) || TNW->Insert(ToBeAdded) || 
+			BNE->Insert(ToBeAdded) || BSE->Insert(ToBeAdded) || BSW->Insert(ToBeAdded) || BNW->Insert(ToBeAdded))
 		{
 			//once one is found return true;
 			return true;
@@ -106,16 +113,21 @@ void UOctTree::Query(FRect Range, TArray<FPoint> &Found)
 int UOctTree::HowManyChildren()
 {
 
-	if (Children.Num() < 1)
+	if (!bIsFilled)
 	{
 		return 1;
 	}
 
 	int count = 1;
-	for (int i = 0; i < Children.Num(); i++)
-	{
-		count += Children[i]->HowManyChildren();
-	}
+
+	count += TNE->HowManyChildren();
+	count += TSE->HowManyChildren();
+	count += TSW->HowManyChildren();
+	count += TNW->HowManyChildren();
+	count += BNE->HowManyChildren();
+	count += BSE->HowManyChildren();
+	count += BSW->HowManyChildren();
+	count += BNW->HowManyChildren();
 
 	return count;
 }
@@ -131,44 +143,46 @@ void UOctTree::Divide()
 	FVector NewSize = Boundary.Size / 2;
 
 	//Top North-East
-	auto* TNE = CreateChild(NewSize);
+	TNE = CreateChild(NewSize);
 	TNE->Boundary.CenterLocation = NewSize;
-	Children.Add(TNE);
+	UE_LOG(LogTemp, Warning, TEXT("%s"), *TNE->Boundary.CenterLocation.ToString())
+
+	//Children.Add(TNE);
 
 	//Top South-East
-	auto* TSE = CreateChild(NewSize);
+	TSE = CreateChild(NewSize);
 	TSE->Boundary.CenterLocation = FVector(-NewSize.X, NewSize.Y, NewSize.Z);
-	Children.Add(TSE);
+	//Children.Add(TSE);
 
 	//Top South-West
-	auto* TSW = CreateChild(NewSize);
+	TSW = CreateChild(NewSize);
 	TSW->Boundary.CenterLocation = FVector(-NewSize.X, -NewSize.Y, NewSize.Z);
-	Children.Add(TSW);
+	//Children.Add(TSW);
 
 	//Top North-West
-	auto* TNW = CreateChild(NewSize);
+	TNW = CreateChild(NewSize);
 	TNW->Boundary.CenterLocation = FVector(NewSize.X, -NewSize.Y, NewSize.Z);
-	Children.Add(TNW);
+	//Children.Add(TNW);
 
 	//Bottom North-East
-	auto* BNE = CreateChild(NewSize);
+	BNE = CreateChild(NewSize);
 	BNE->Boundary.CenterLocation = FVector(NewSize.X, NewSize.Y, -NewSize.Z);
-	Children.Add(BNE);
+	//Children.Add(BNE);
 
 	//Bottom South-East
-	auto* BSE = CreateChild(NewSize);
+	BSE = CreateChild(NewSize);
 	BSE->Boundary.CenterLocation = FVector(-NewSize.X, NewSize.Y, -NewSize.Z);
-	Children.Add(BSE);
+	//Children.Add(BSE);
 
 	//Bottom South-West
-	auto* BSW = CreateChild(NewSize);
+	BSW = CreateChild(NewSize);
 	BSW->Boundary.CenterLocation = FVector(-NewSize);
-	Children.Add(BSW);
+	//Children.Add(BSW);
 
 	//Bottom North-West
-	auto* BNW = CreateChild(NewSize);
+	BNW = CreateChild(NewSize);
 	BNW->Boundary.CenterLocation = FVector(NewSize.X, -NewSize.Y, -NewSize.Z);
-	Children.Add(BNW);
+	//Children.Add(BNW);
 	
 	bIsFilled = true;
 }
@@ -179,6 +193,7 @@ UOctTree* UOctTree::CreateChild(const FVector &NewSize)
 	Child->SpawnerRef = SpawnerRef;
 	Child->Capacity = Capacity;
 	Child->Boundary.Size = NewSize;
+	Child->NewMapWorld = NewMapWorld;
 
 	if (!Child)
 		return nullptr;

@@ -77,8 +77,31 @@ public:
 	TArray<FPoint> Nodes;
 
 	//Keeps a list of all the children that are created once this upper part of the tree is filledd
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Tree", Instanced)
-	TArray<UOctTree*> Children;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Children", Instanced)
+	UOctTree* TNE;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Children", Instanced)
+	UOctTree* TSE;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Children", Instanced)
+	UOctTree* TSW;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Children", Instanced)
+	UOctTree* TNW;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Children", Instanced)
+	UOctTree* BNE;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Children", Instanced)
+	UOctTree* BSE;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Children", Instanced)
+	UOctTree* BSW;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Children", Instanced)
+	UOctTree* BNW;
+
+
 
 	//tracks what is the limit of how many point can be in each child
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Tree")
@@ -103,11 +126,14 @@ public:
 
 	int HowManyChildren();
 
+	UWorld* NewMapWorld;
+
 private:
 	//used when an insert is needed and the current parent is filled
 	void Divide();
 
 	UOctTree* CreateChild(const FVector & NewSize);
+
 
 
 
