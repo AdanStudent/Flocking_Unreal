@@ -57,8 +57,6 @@ void UOctTree::Display()
 		//UE_LOG(LogTemp, Warning, TEXT("%s"), *GetName())
 
 		DrawDebugBox(NewMapWorld, Boundary.CenterLocation, Boundary.Size, FColor::Red, true, -1.f, 0, 2);
-		UE_LOG(LogTemp, Warning, TEXT("Boundary Center: %s"), *Boundary.CenterLocation.ToString())
-
 
 		for (int32 i = 0; i < Nodes.Num(); i++)
 		{
@@ -161,6 +159,7 @@ void UOctTree::Divide()
 	//Top South-East
 	TSE = CreateChild(NewSize);
 	TSE->Boundary.CenterLocation = FVector(-NewSize.X, NewSize.Y, NewSize.Z) + FVector(-Boundary.CenterLocation.X, Boundary.CenterLocation.Y, Boundary.CenterLocation.Z);
+	UE_LOG(LogTemp, Warning, TEXT("TSE Center: %s"), *TSE->Boundary.CenterLocation.ToString())
 
 	//Top South-West
 	TSW = CreateChild(NewSize);
@@ -174,6 +173,8 @@ void UOctTree::Divide()
 	//Bottom North-East
 	BNE = CreateChild(NewSize);
 	BNE->Boundary.CenterLocation = FVector(NewSize.X, NewSize.Y, -NewSize.Z) + FVector(Boundary.CenterLocation.X, Boundary.CenterLocation.Y, -Boundary.CenterLocation.Z);
+	UE_LOG(LogTemp, Warning, TEXT("TSE Center: %s"), *BNE->Boundary.CenterLocation.ToString())
+
 
 	//Bottom South-East
 	BSE = CreateChild(NewSize);
