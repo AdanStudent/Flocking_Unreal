@@ -7,11 +7,19 @@
 
 bool FRect::Contains(FPoint Node)
 {
-	float Distance = FVector::DistSquared(CenterLocation, Node.Location);
-	if (Distance < Size.X * Size.X)
+	if ((Size.X - CenterLocation.X/2) >= Node.Location.X || (Size.X + CenterLocation.X / 2) <= Node.Location.X)
 	{
 		return true;
 	}
+	else if ((Size.Y - CenterLocation.Y / 2) >= Node.Location.Y || (Size.Y + CenterLocation.Y / 2) <= Node.Location.Y)
+	{
+		return true;
+	}
+	else if ((Size.Z - CenterLocation.Z / 2) >= Node.Location.Z || (Size.Z + CenterLocation.Z / 2) <= Node.Location.Z)
+	{
+		return true;
+	}
+
 
 	return false;
 }
@@ -145,14 +153,13 @@ void UOctTree::Divide()
 	//Top North-East
 	TNE = CreateChild(NewSize);
 	TNE->Boundary.CenterLocation = NewSize;
-	UE_LOG(LogTemp, Warning, TEXT("%s"), *TNE->Boundary.CenterLocation.ToString())
+	//UE_LOG(LogTemp, Warning, TEXT("%s"), *TNE->Boundary.CenterLocation.ToString())
 
 	//Children.Add(TNE);
 
 	//Top South-East
 	TSE = CreateChild(NewSize);
 	TSE->Boundary.CenterLocation = FVector(-NewSize.X, NewSize.Y, NewSize.Z);
-	UE_LOG(LogTemp, Warning, TEXT("%s"), *TSE->Boundary.CenterLocation.ToString())
 	//Children.Add(TSE);
 
 	//Top South-West
@@ -178,11 +185,13 @@ void UOctTree::Divide()
 	//Bottom South-West
 	BSW = CreateChild(NewSize);
 	BSW->Boundary.CenterLocation = FVector(-NewSize);
+	//UE_LOG(LogTemp, Warning, TEXT("%s"), *BSW->Boundary.CenterLocation.ToString())
 	//Children.Add(BSW);
 
 	//Bottom North-West
 	BNW = CreateChild(NewSize);
 	BNW->Boundary.CenterLocation = FVector(NewSize.X, -NewSize.Y, -NewSize.Z);
+
 	//Children.Add(BNW);
 	
 	bIsFilled = true;

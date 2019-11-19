@@ -34,6 +34,8 @@ void ASpawner::SpawnActors()
 		FRandomStream Rand;
 		Rand.GenerateNewSeed();
 
+		int counter = 0;
+
 		for (int32 i = 0; i < NumToSpawn; i++)
 		{
 			//Spawning Agent
@@ -55,8 +57,13 @@ void ASpawner::SpawnActors()
 			Point.Location = Agent->GetActorLocation();
 			Point.Data = Agent;
 
-			Tree->Insert(Point);
+			if (Tree->Insert(Point))
+			{
+				counter++;
+			}
 		}
+
+		UE_LOG(LogTemp, Warning, TEXT("Number of inserts: %d"), counter)
 	}
 }
 
@@ -71,14 +78,6 @@ void ASpawner::BeginPlay()
 	int count = Tree->HowManyChildren();
 
 	UE_LOG(LogTemp, Warning, TEXT("Number of children: %d"), count);
-
-
-	//DrawDebugBox(GetWorld(), FVector(1000), FVector(1000), FColor::Black, true, -1.f, 0, 10);
-	//DrawDebugBox(GetWorld(), FVector(-1000), FVector(1000), FColor::Black, true, -1.f, 0, 10);
-
-	//DrawDebugBox(GetWorld(), FVector::ZeroVector, FVector(2000), FColor::Red, true, -1.f, 0, 10);
-
-
 	
 }
 
