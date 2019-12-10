@@ -45,6 +45,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Rect")
 	FVector Size;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Rect")
+	FColor Color;
+
 	//used to check if a point is within the bounds of this Rect
 	bool Contains(FPoint Node);
 	

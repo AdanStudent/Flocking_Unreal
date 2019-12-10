@@ -7,18 +7,20 @@
 
 bool FRect::Contains(FPoint Node)
 {
-	if ((Size.X - CenterLocation.X/2) >= Node.Location.X || (Size.X + CenterLocation.X / 2) <= Node.Location.X)
+	if ((Node.Location.X >= (CenterLocation.X/2) - Size.X) && ((Node.Location.X <= (CenterLocation.X / 2) + Size.X)) &&
+		(Node.Location.Y >= (CenterLocation.Y / 2) - Size.Y) && ((Node.Location.Y <= (CenterLocation.Y / 2) + Size.Y)) &&
+		(Node.Location.Z >= (CenterLocation.Z / 2) - Size.Z) && ((Node.Location.Z <= (CenterLocation.Z / 2) + Size.Z)))
 	{
 		return true;
 	}
-	else if ((Size.Y - CenterLocation.Y / 2) >= Node.Location.Y || (Size.Y + CenterLocation.Y / 2) <= Node.Location.Y)
-	{
-		return true;
-	}
-	else if ((Size.Z - CenterLocation.Z / 2) >= Node.Location.Z || (Size.Z + CenterLocation.Z / 2) <= Node.Location.Z)
-	{
-		return true;
-	}
+	//else if ((Size.Y - CenterLocation.Y / 2) >= Node.Location.Y || (Size.Y + CenterLocation.Y / 2) <= Node.Location.Y)
+	//{
+	//	return true;
+	//}
+	//else if ((Size.Z - CenterLocation.Z / 2) >= Node.Location.Z || (Size.Z + CenterLocation.Z / 2) <= Node.Location.Z)
+	//{
+	//	return true;
+	//}
 
 
 	return false;
@@ -48,6 +50,8 @@ UOctTree::UOctTree()
 	//}
 
 	//NewMapWorld = GetWorld();
+
+	Boundary.Color = FColor::Black;
 }
 
 void UOctTree::Display()
@@ -56,13 +60,14 @@ void UOctTree::Display()
 	{
 		//UE_LOG(LogTemp, Warning, TEXT("%s"), *GetName())
 
-		DrawDebugBox(NewMapWorld, Boundary.CenterLocation, Boundary.Size, FColor::Red, true, -1.f, 0, 2);
-		UE_LOG(LogTemp, Warning, TEXT("Boundary Center: %s"), *Boundary.CenterLocation.ToString())
+		DrawDebugBox(NewMapWorld, Boundary.CenterLocation, Boundary.Size, Boundary.Color, true, -1.f, 0, 10);
+		//UE_LOG(LogTemp, Warning, TEXT("Boundary Center: %s"), *Boundary.CenterLocation.ToString())
 
 
 		for (int32 i = 0; i < Nodes.Num(); i++)
 		{
-			DrawDebugPoint(NewMapWorld, Nodes[i].Location, 5, FColor::Green, true, -1);
+			DrawDebugPoint(NewMapWorld, Nodes[i].Location, 5, Boundary.Color, true, -1);
+			DrawDebugLine(NewMapWorld, Nodes[i].Location, Boundary.CenterLocation, Boundary.Color, true, -1.f, 0, 3);
 		}
 
 		if (bIsFilled)
@@ -152,41 +157,56 @@ void UOctTree::Divide()
 		return;
 	}
 
-	FVector NewSize = Boundary.Size / 2;
+	FVector NewSize = Boundary.Size;
 
 	//Top North-East
-	TNE = CreateChild(NewSize);
-	TNE->Boundary.CenterLocation = NewSize + Boundary.CenterLocation;
+	TNE = CreateChild(NewSize/2);
+	FVector TNE_Corner = FVector(Boundary.CenterLocation.X, Boundary.CenterLocation.Y, Boundary.CenterLocation.Z) + FVector(NewSize.X, NewSize.Y, NewSize.Z);
+	TNE->Boundary.CenterLocation = (Boundary.CenterLocation + FVector(TNE_Corner.X, TNE_Corner.Y, TNE_Corner.Z))/2;
+	TNE->Boundary.Color = FColor::Red;
 
 	//Top South-East
-	TSE = CreateChild(NewSize);
-	TSE->Boundary.CenterLocation = FVector(-NewSize.X, NewSize.Y, NewSize.Z) + FVector(-Boundary.CenterLocation.X, Boundary.CenterLocation.Y, Boundary.CenterLocation.Z);
-
+	TSE = CreateChild(NewSize/2);
+	TSE->Boundary.CenterLocation = FVector(Boundary.CenterLocation.X, Boundary.CenterLocation.Y, Boundary.CenterLocation.Z) + FVector(-NewSize.X, NewSize.Y, NewSize.Z);
+	TSE->Boundary.CenterLocation = (Boundary.CenterLocation + FVector(TSE->Boundary.CenterLocation.X, TSE->Boundary.CenterLocation.Y, TSE->Boundary.CenterLocation.Z))/2;
+	TSE->Boundary.Color = FColor::Orange;
+	
 	//Top South-West
-	TSW = CreateChild(NewSize);
-	TSW->Boundary.CenterLocation = FVector(-NewSize.X, -NewSize.Y, NewSize.Z) + FVector(-Boundary.CenterLocation.X, -Boundary.CenterLocation.Y, Boundary.CenterLocation.Z);
-
+	TSW = CreateChild(NewSize/2);
+	TSW->Boundary.CenterLocation = FVector(Boundary.CenterLocation.X, Boundary.CenterLocation.Y, Boundary.CenterLocation.Z) + FVector(-NewSize.X, -NewSize.Y, NewSize.Z);
+	TSW->Boundary.CenterLocation = (Boundary.CenterLocation + FVector(TSW->Boundary.CenterLocation.X, TSW->Boundary.CenterLocation.Y, TSW->Boundary.CenterLocation.Z))/2;
+	TSW->Boundary.Color = FColor::Yellow;
+	
 	//Top North-West
-	TNW = CreateChild(NewSize);
-	TNW->Boundary.CenterLocation = FVector(NewSize.X, -NewSize.Y, NewSize.Z) + FVector(Boundary.CenterLocation.X, -Boundary.CenterLocation.Y, Boundary.CenterLocation.Z);
-
-
+	TNW = CreateChild(NewSize/2);
+	TNW->Boundary.CenterLocation = FVector(Boundary.CenterLocation.X, Boundary.CenterLocation.Y, Boundary.CenterLocation.Z) + FVector(NewSize.X, -NewSize.Y, NewSize.Z);
+	TNW->Boundary.CenterLocation = (Boundary.CenterLocation + FVector(TNW->Boundary.CenterLocation.X, TNW->Boundary.CenterLocation.Y, TNW->Boundary.CenterLocation.Z)) / 2;
+	TNW->Boundary.Color = FColor::Green;
+	
 	//Bottom North-East
-	BNE = CreateChild(NewSize);
-	BNE->Boundary.CenterLocation = FVector(NewSize.X, NewSize.Y, -NewSize.Z) + FVector(Boundary.CenterLocation.X, Boundary.CenterLocation.Y, -Boundary.CenterLocation.Z);
-
+	BNE = CreateChild(NewSize/2);
+	BNE->Boundary.CenterLocation = FVector(Boundary.CenterLocation.X, Boundary.CenterLocation.Y, Boundary.CenterLocation.Z) + FVector(NewSize.X, NewSize.Y, -NewSize.Z);
+	BNE->Boundary.CenterLocation = (Boundary.CenterLocation + FVector(BNE->Boundary.CenterLocation.X, BNE->Boundary.CenterLocation.Y, BNE->Boundary.CenterLocation.Z)) / 2;
+	BNE->Boundary.Color = FColor::Blue;
+	
 	//Bottom South-East
-	BSE = CreateChild(NewSize);
-	BSE->Boundary.CenterLocation = FVector(-NewSize.X, NewSize.Y, -NewSize.Z) + FVector(-Boundary.CenterLocation.X, Boundary.CenterLocation.Y, -Boundary.CenterLocation.Z);
-
+	BSE = CreateChild(NewSize/2);
+	BSE->Boundary.CenterLocation = FVector(Boundary.CenterLocation.X, Boundary.CenterLocation.Y, Boundary.CenterLocation.Z) + FVector(-NewSize.X, NewSize.Y, -NewSize.Z);
+	BSE->Boundary.CenterLocation = (Boundary.CenterLocation + FVector(BSE->Boundary.CenterLocation.X, BSE->Boundary.CenterLocation.Y, BSE->Boundary.CenterLocation.Z)) / 2;
+	BSE->Boundary.Color = FColor::Purple;
+	
 	//Bottom South-West
-	BSW = CreateChild(NewSize);
-	BSW->Boundary.CenterLocation = FVector(-NewSize) - Boundary.CenterLocation;
+	BSW = CreateChild(NewSize/2);
+	BSW->Boundary.CenterLocation = FVector(Boundary.CenterLocation.X, Boundary.CenterLocation.Y, Boundary.CenterLocation.Z) + FVector(-NewSize.X, -NewSize.Y, -NewSize.Z);
+	BSW->Boundary.CenterLocation = (Boundary.CenterLocation + FVector(BSW->Boundary.CenterLocation.X, BSW->Boundary.CenterLocation.Y, BSW->Boundary.CenterLocation.Z)) / 2;
+	BSW->Boundary.Color = FColor::Cyan;
 
 	//Bottom North-West
-	BNW = CreateChild(NewSize);
-	BNW->Boundary.CenterLocation = FVector(NewSize.X, -NewSize.Y, -NewSize.Z) + FVector(Boundary.CenterLocation.X, -Boundary.CenterLocation.Y, -Boundary.CenterLocation.Z);
-
+	BNW = CreateChild(NewSize/2);
+	BNW->Boundary.CenterLocation = FVector(Boundary.CenterLocation.X, Boundary.CenterLocation.Y, Boundary.CenterLocation.Z) + FVector(NewSize.X, -NewSize.Y, -NewSize.Z);
+	BNW->Boundary.CenterLocation = (Boundary.CenterLocation + FVector(BNW->Boundary.CenterLocation.X, BNW->Boundary.CenterLocation.Y, BNW->Boundary.CenterLocation.Z)) / 2;
+	BNW->Boundary.Color = FColor::White;
+	
 	
 	bIsFilled = true;
 }
