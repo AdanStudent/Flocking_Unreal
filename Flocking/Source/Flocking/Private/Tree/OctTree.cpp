@@ -13,22 +13,16 @@ bool FRect::Contains(FPoint Node)
 	{
 		return true;
 	}
-	//else if ((Size.Y - CenterLocation.Y / 2) >= Node.Location.Y || (Size.Y + CenterLocation.Y / 2) <= Node.Location.Y)
-	//{
-	//	return true;
-	//}
-	//else if ((Size.Z - CenterLocation.Z / 2) >= Node.Location.Z || (Size.Z + CenterLocation.Z / 2) <= Node.Location.Z)
-	//{
-	//	return true;
-	//}
-
 
 	return false;
 }
 
 bool FRect::Intersects(FRect Range)
 {
-	return false;
+	//Check if the Bounds of the FRect Range intersects with this FRect
+	return !((Range.CenterLocation.X - Range.Size.X > CenterLocation.X + Size.X) || (Range.CenterLocation.X + Range.Size.X < CenterLocation.X - Size.X) 
+		||	(Range.CenterLocation.Y - Range.Size.Y > CenterLocation.Y + Size.Y) || (Range.CenterLocation.Y + Range.Size.Y < CenterLocation.Y - Size.Y) 
+		||	(Range.CenterLocation.Z - Range.Size.Z > CenterLocation.X + Size.Z) || (Range.CenterLocation.Z + Range.Size.Z < CenterLocation.Z - Size.Z));
 }
 
 UOctTree::UOctTree()
@@ -38,36 +32,24 @@ UOctTree::UOctTree()
 	
 	Boundary.CenterLocation = FVector::ZeroVector;
 
-	//FBox box;
-
-	//for (int32 i = 0; i < 8; i++)
-	//{
-	//	UOctTree* Child = CreateDefaultSubobject<UOctTree>("Child");
-	//	Child->Capacity = Capacity;
-	//	Child->Boundary.Size = FVector(Boundary.Size/ 2);
-	//	//Child->Boundary.CenterLocation = FVector()
-	//	Children.Add(Child);
-	//}
-
-	//NewMapWorld = GetWorld();
-
 	Boundary.Color = FColor::Black;
+	Boundary.bIsIntersected = true;
 }
 
 void UOctTree::Display()
 {
 	if (NewMapWorld)
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("%s"), *GetName())
-
-		DrawDebugBox(NewMapWorld, Boundary.CenterLocation, Boundary.Size, Boundary.Color, true, -1.f, 0, 10);
-		//UE_LOG(LogTemp, Warning, TEXT("Boundary Center: %s"), *Boundary.CenterLocation.ToString())
-
-
-		for (int32 i = 0; i < Nodes.Num(); i++)
+		if (Boundary.bIsIntersected)
 		{
-			DrawDebugPoint(NewMapWorld, Nodes[i].Location, 5, Boundary.Color, true, -1);
-			DrawDebugLine(NewMapWorld, Nodes[i].Location, Boundary.CenterLocation, Boundary.Color, true, -1.f, 0, 3);
+			DrawDebugBox(NewMapWorld, Boundary.CenterLocation, Boundary.Size, Boundary.Color, true, -1.f, 0, 10);
+
+
+			for (int32 i = 0; i < Nodes.Num(); i++)
+			{
+				DrawDebugPoint(NewMapWorld, Nodes[i].Location, 5, Boundary.Color, true, -1);
+				//DrawDebugLine(NewMapWorld, Nodes[i].Location, Boundary.CenterLocation, Boundary.Color, true, -1.f, 0, 3);
+			}
 		}
 
 		if (bIsFilled)
@@ -109,7 +91,6 @@ bool UOctTree::Insert(FPoint ToBeAdded)
 		}
 
 		//check each subdivision to see if it can be inserted
-		//UE_LOG(LogTemp, Warning, TEXT(""))
 		if (TNE->Insert(ToBeAdded) || TSE->Insert(ToBeAdded) || TSW->Insert(ToBeAdded) || TNW->Insert(ToBeAdded) || 
 			BNE->Insert(ToBeAdded) || BSE->Insert(ToBeAdded) || BSW->Insert(ToBeAdded) || BNW->Insert(ToBeAdded))
 		{
@@ -125,6 +106,38 @@ bool UOctTree::Insert(FPoint ToBeAdded)
 
 void UOctTree::Query(FRect Range, TArray<FPoint> &Found)
 {
+	//if the Range does not intersect the Boundary then return
+	if (!Boundary.Intersects(Range))
+	{
+		return;
+	}
+	else //otherwise check each point within this boundary and all its children
+	{
+		for (int i = 0; i < Nodes.Num(); i++)
+		{
+			if (Range.Contains(Nodes[i]))
+			{
+				Found.Push(Nodes[i]);
+				Boundary.bIsIntersected = true;
+			}
+		}
+
+		if (bIsFilled)
+		{
+			TNE->Query(Range, Found);
+			TSE->Query(Range, Found);
+			TSW->Query(Range, Found);
+			TNW->Query(Range, Found);
+			BNE->Query(Range, Found);
+			BSE->Query(Range, Found);
+			BSW->Query(Range, Found);
+			BNW->Query(Range, Found);
+
+		}
+	}
+
+	return;
+
 }
 
 int UOctTree::HowManyChildren()

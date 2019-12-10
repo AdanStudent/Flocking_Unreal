@@ -54,10 +54,13 @@ public:
 	//Used to check if another Rect intersects with this one
 	bool Intersects(FRect Range);
 
+	bool bIsIntersected;
+
 	FRect()
 	{
 		CenterLocation = FVector::ZeroVector;
 		Size = FVector::ZeroVector;
+		bIsIntersected = false;
 	};
 
 };

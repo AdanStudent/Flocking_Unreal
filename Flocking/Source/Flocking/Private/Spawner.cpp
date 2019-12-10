@@ -74,12 +74,22 @@ void ASpawner::BeginPlay()
 	
 	Tree->NewMapWorld = GetWorld();
 	SpawnActors();
+
+	FRandomStream Rand;
+	Rand.GenerateNewSeed();
+	FRect Temp;
+	Temp.CenterLocation = Rand.GetUnitVector() * Rand.FRandRange(1, 2000);
+	Temp.Size = FVector(500);
+	DrawDebugBox(GetWorld(), Temp.CenterLocation, Temp.Size, FColor::Black, true, -1.f, 0, 5);
+
+	TArray<FPoint> FoundPoints;
+	Tree->Query(Temp, FoundPoints);
+
+	UE_LOG(LogTemp, Warning, TEXT("Number of Found Points: %d"), FoundPoints.Num());
+
 	Tree->Display();
+
 	int count = Tree->HowManyChildren();
-
-	//DrawDebugBox(GetWorld(), FVector(), FVector(2000), FColor::Green, true, -1.f, 0, 5);
-
-
 	UE_LOG(LogTemp, Warning, TEXT("Number of children: %d"), count);
 	
 }
