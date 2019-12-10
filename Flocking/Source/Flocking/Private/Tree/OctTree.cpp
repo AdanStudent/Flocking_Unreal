@@ -7,9 +7,9 @@
 
 bool FRect::Contains(FPoint Node)
 {
-	if ((Node.Location.X >= (CenterLocation.X/2) - Size.X) && ((Node.Location.X <= (CenterLocation.X / 2) + Size.X)) &&
-		(Node.Location.Y >= (CenterLocation.Y / 2) - Size.Y) && ((Node.Location.Y <= (CenterLocation.Y / 2) + Size.Y)) &&
-		(Node.Location.Z >= (CenterLocation.Z / 2) - Size.Z) && ((Node.Location.Z <= (CenterLocation.Z / 2) + Size.Z)))
+	if ((Node.Location.X >= (CenterLocation.X) - Size.X) && ((Node.Location.X <= (CenterLocation.X) + Size.X)) &&
+		(Node.Location.Y >= (CenterLocation.Y) - Size.Y) && ((Node.Location.Y <= (CenterLocation.Y) + Size.Y)) &&
+		(Node.Location.Z >= (CenterLocation.Z) - Size.Z) && ((Node.Location.Z <= (CenterLocation.Z) + Size.Z)))
 	{
 		return true;
 	}
