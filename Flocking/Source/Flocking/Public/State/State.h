@@ -16,7 +16,7 @@ class FLOCKING_API UState : public UObject, public IIState
 	GENERATED_BODY()
 
 public:
-	UState();
+	//UState();
 
 	bool bIsActive;
 
@@ -33,8 +33,7 @@ class FLOCKING_API UFlocking : public UState
 	GENERATED_BODY()
 
 public:
-	UFlocking();
-
+	//UFlocking();
 
 	virtual void Enter(AActor* Owner) override;
 	virtual void Execute(AActor* Owner) override;
