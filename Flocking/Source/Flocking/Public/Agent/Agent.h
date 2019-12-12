@@ -31,7 +31,7 @@ public:
 	float MaxForce;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Steering Behaviors")
-	TArray<class UState> SteeringState;
+	TArray<class UState*> SteeringState;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Steering Behaviors")
 	TArray<AAgent*> Neighbors;
