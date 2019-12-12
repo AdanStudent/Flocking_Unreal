@@ -58,25 +58,33 @@ void USteeringComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAc
 
 void USteeringComponent::UpdateForces(float DeltaTime)
 {
-	SteeringForce += /*(Seperation() * 10) + Alignment() + Cohesion() +*/ Wander();
-
-	if (SteeringForce.Size() > 0.0001f)
+	if (Agent)
 	{
-		Acceleration = SteeringForce / Agent->GetMass();
-		Agent->SetDirection(Agent->GetDirection() + Acceleration * DeltaTime);
 
-		FVector NewLocation = Agent->GetActorLocation();
+		SteeringForce += /*(Seperation() * 10) + Alignment() + Cohesion() +*/ Wander();
 
-		NewLocation += Agent->GetDirection() * DeltaTime;
-		Agent->SetActorLocation(NewLocation);
+		if (SteeringForce.Size() > 0.0001f)
+		{
+			Acceleration = SteeringForce / Agent->GetMass();
+			Agent->SetDirection(Agent->GetDirection() + Acceleration * DeltaTime);
 
-		FRotator Rotation = UKismetMathLibrary::FindLookAtRotation(Agent->GetActorRotation().Vector(), Agent->GetDirection());
-		Agent->SetActorRotation(Rotation);
+			Agent->SetHeading(Agent->GetDirection().GetSafeNormal());
 
-		SteeringForce = FVector::ZeroVector;
+			FVector NewLocation = Agent->GetActorLocation();
+
+			NewLocation += Agent->GetDirection() * DeltaTime;
+			Agent->SetActorLocation(NewLocation);
+
+			FRotator Rotation = UKismetMathLibrary::FindLookAtRotation(Agent->GetActorRotation().Vector(), Agent->GetDirection());
+			Agent->SetActorRotation(Rotation);
+
+			SteeringForce = FVector::ZeroVector;
+
+		}
+
+		WrapAroundWorld();
 
 	}
-
 }
 
 FVector USteeringComponent::Seek(const FVector Target)
@@ -93,7 +101,7 @@ FVector USteeringComponent::Seek(const FVector Target)
 FVector USteeringComponent::Wander()
 {
 	WanderTheta += RandStream.FRandRange(-WanderJitterPerSecond, WanderJitterPerSecond);
-	FVector Heading = Agent->GetDirection().GetSafeNormal();
+	FVector Heading = Agent->GetHeading();
 
 	FVector CirclePos = Heading;
 	CirclePos *= WanderDist;

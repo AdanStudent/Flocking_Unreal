@@ -4,6 +4,8 @@
 #include "..\Public\Spawner.h"
 #include "Engine/World.h"
 #include "../Public/Tree/OctTree.h"
+#include "Public/Agent/Agent.h"
+#include "Public/Agent/SteeringComponent.h"
 #include "DrawDebugHelpers.h"
 
 
@@ -46,7 +48,9 @@ void ASpawner::SpawnActors()
 
 			FVector Loc = Rand.GetUnitVector() * range;
 
-			AActor* Agent = GetWorld()->SpawnActor<AActor>(ActorToBeSpawned, Loc, FRotator::ZeroRotator, sParameters);
+			AAgent* Agent = GetWorld()->SpawnActor<AAgent>(ActorToBeSpawned, Loc, FRotator::ZeroRotator, sParameters);
+
+			Agent->GetSteeringComp()->SetAgent(Agent);
 
 			//Add Agent to the Agents list
 			SpawnedUnits.Add(Agent);
@@ -75,22 +79,22 @@ void ASpawner::BeginPlay()
 	Tree->NewMapWorld = GetWorld();
 	SpawnActors();
 
-	FRandomStream Rand;
-	Rand.GenerateNewSeed();
-	FRect Temp;
-	Temp.CenterLocation = Rand.GetUnitVector() * Rand.FRandRange(1, 2000);
-	Temp.Size = FVector(500);
-	DrawDebugBox(GetWorld(), Temp.CenterLocation, Temp.Size, FColor::Black, true, -1.f, 0, 5);
+	//FRandomStream Rand;
+	//Rand.GenerateNewSeed();
+	//FRect Temp;
+	//Temp.CenterLocation = Rand.GetUnitVector() * Rand.FRandRange(1, 2000);
+	//Temp.Size = FVector(500);
+	//DrawDebugBox(GetWorld(), Temp.CenterLocation, Temp.Size, FColor::Black, true, -1.f, 0, 5);
 
-	TArray<FPoint> FoundPoints;
-	Tree->Query(Temp, FoundPoints);
+	//TArray<FPoint> FoundPoints;
+	//Tree->Query(Temp, FoundPoints);
 
-	UE_LOG(LogTemp, Warning, TEXT("Number of Found Points: %d"), FoundPoints.Num());
+	//UE_LOG(LogTemp, Warning, TEXT("Number of Found Points: %d"), FoundPoints.Num());
 
-	Tree->Display();
+	//Tree->Display();
 
-	int count = Tree->HowManyChildren();
-	UE_LOG(LogTemp, Warning, TEXT("Number of children: %d"), count);
+	//int count = Tree->HowManyChildren();
+	//UE_LOG(LogTemp, Warning, TEXT("Number of children: %d"), count);
 	
 }
 

@@ -44,6 +44,7 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Steering Behaviors")
 		float DesiredCohesion;
 
+public:
 	UPROPERTY(EditDefaultsOnly, Category = "Steering Behaviors")
 		class AAgent* Agent;
 

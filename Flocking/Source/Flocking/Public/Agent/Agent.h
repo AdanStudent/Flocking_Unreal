@@ -56,7 +56,7 @@ public:
 
 	//SetAIManager();
 
-	const USteeringComponent* GetSteeringComp() { return SteeringComp; }
+	USteeringComponent* GetSteeringComp() { return SteeringComp; }
 
 	const TArray<AAgent*> GetNeighbors() { return Neighbors; }
 
