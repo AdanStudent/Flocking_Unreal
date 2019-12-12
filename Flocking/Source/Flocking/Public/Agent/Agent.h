@@ -6,6 +6,8 @@
 #include "GameFramework/Actor.h"
 #include "Agent.generated.h"
 
+class USteeringComponent;
+
 UCLASS()
 class FLOCKING_API AAgent : public AActor
 {
@@ -15,37 +17,34 @@ public:
 	// Sets default values for this actor's properties
 	AAgent();
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Steering Behaviors")
+
+private:
+	UPROPERTY(EditDefaultsOnly, Category = "Steering Behaviors")
 	FVector Direction;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Steering Behaviors")
+	UPROPERTY(EditDefaultsOnly, Category = "Steering Behaviors")
 	FVector Heading;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Steering Behaviors")
+	UPROPERTY(EditDefaultsOnly, Category = "Steering Behaviors")
 	float Mass;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Steering Behaviors")
+	UPROPERTY(EditDefaultsOnly, Category = "Steering Behaviors")
 	float MaxSpeed;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Steering Behaviors")
+	UPROPERTY(EditDefaultsOnly, Category = "Steering Behaviors")
 	float MaxForce;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Steering Behaviors")
+	UPROPERTY(EditDefaultsOnly, Category = "Steering Behaviors")
 	TArray<class UState*> SteeringState;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Steering Behaviors")
+	UPROPERTY(EditAnywhere, Category = "Steering Behaviors")
 	TArray<AAgent*> Neighbors;
 
 	//Placeholder
 	//AIManager
-	//SetAIManager();
 
-	//SteeringComp
-	//GetSteeringComp();
-
-
-
-
+	//Runs all steering behaviors for this agent
+	USteeringComponent* SteeringComp;
 
 protected:
 	// Called when the game starts or when spawned
@@ -55,10 +54,26 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	void RunSteeringBehaviors();
+	//SetAIManager();
 
-	void ClearNeighbors();
+	const USteeringComponent* GetSteeringComp() { return SteeringComp; }
+
+	const TArray<AAgent*> GetNeighbors() { return Neighbors; }
+
+	FVector GetDirection() { return Direction; }
+	void SetDirection(FVector Value) { Direction = Value; }
+
+	FVector GetHeading() { return Heading; }
+	void SetHeading(FVector Value) { Heading = Value; }
+
+	const float GetMass() { return Mass; }
+	const float GetMaxSpeed() { return MaxSpeed; }
+	const float GetMaxForce() { return MaxForce; }
 
 	void SetNeighbors(TArray<AAgent*> OtherAgents);
+	void RunSteeringBehaviors();
+
+private:
+	void ClearNeighbors();
 
 };

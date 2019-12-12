@@ -17,28 +17,28 @@ public:
 	USteeringComponent();
 
 private:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Steering Behaviors")
+	UPROPERTY(EditDefaultsOnly, Category = "Steering Behaviors")
 		FVector SteeringForce;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Steering Behaviors")
+	UPROPERTY(EditDefaultsOnly, Category = "Steering Behaviors")
 		float CircleRadius;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Steering Behaviors")
+	UPROPERTY(EditDefaultsOnly, Category = "Steering Behaviors")
 		float WanderDist;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Steering Behaviors")
+	UPROPERTY(EditDefaultsOnly, Category = "Steering Behaviors")
 		float WanderJitterPerSecond;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Steering Behaviors")
+	UPROPERTY(EditDefaultsOnly, Category = "Steering Behaviors")
 		float DesiredSeparation;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Steering Behaviors")
+	UPROPERTY(EditDefaultsOnly, Category = "Steering Behaviors")
 		float DesiredAlignment;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Steering Behaviors")
-		float DesiredAlignment;
+	UPROPERTY(EditDefaultsOnly, Category = "Steering Behaviors")
+		float DesiredCohesion;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Steering Behaviors")
+	UPROPERTY(EditDefaultsOnly, Category = "Steering Behaviors")
 		class AAgent* Agent;
 
 	FRandomStream RandStream;
@@ -53,7 +53,7 @@ public:
 
 	void SetAgent(AAgent* OwningAgent);
 
-	AAgent* GetAgent() const { return Agent; };
+	const AAgent* GetAgent() const { return Agent; };
 
 	//used to update the calculations of this component
 	void UpdateForces();
