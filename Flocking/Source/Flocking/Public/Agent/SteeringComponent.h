@@ -21,6 +21,12 @@ private:
 		FVector SteeringForce;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Steering Behaviors")
+		FVector Acceleration;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Steering Behaviors")
+		float WanderTheta;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Steering Behaviors")
 		float CircleRadius;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Steering Behaviors")
@@ -56,7 +62,7 @@ public:
 	const AAgent* GetAgent() const { return Agent; };
 
 	//used to update the calculations of this component
-	void UpdateForces();
+	void UpdateForces(float DeltaTime);
 	
 
 private:

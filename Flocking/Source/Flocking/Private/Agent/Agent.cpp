@@ -2,6 +2,7 @@
 
 
 #include "Public\Agent\Agent.h"
+#include "Public\Agent\SteeringComponent.h"
 
 // Sets default values
 AAgent::AAgent()
@@ -9,6 +10,11 @@ AAgent::AAgent()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	SteeringComp = CreateDefaultSubobject<USteeringComponent>("Steering Comp");
+
+	Mass = 10.f;
+	MaxSpeed = 1000.f;
+	MaxForce = 5000.f;
 }
 
 
@@ -23,7 +29,9 @@ void AAgent::BeginPlay()
 void AAgent::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+	
+	SteeringComp->UpdateForces(DeltaTime);
+	ClearNeighbors();
 }
 
 void AAgent::RunSteeringBehaviors()

@@ -3,6 +3,8 @@
 
 #include "Public\Agent\SteeringComponent.h"
 #include "Public\Agent\Agent.h"
+#include "Kismet\KismetMathLibrary.h"
+
 
 // Sets default values for this component's properties
 USteeringComponent::USteeringComponent()
@@ -11,12 +13,27 @@ USteeringComponent::USteeringComponent()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 
+
+	CircleRadius = 50;
+	WanderDist = 80;
+	WanderJitterPerSecond = 0.3f;
+
+	DesiredSeparation = 150.f;
+	DesiredAlignment = 500.f;
+	DesiredCohesion = 750.f;
+
+	RandStream.GenerateNewSeed();
+
 	// ...
 }
 
 
 void USteeringComponent::SetAgent(AAgent* OwningAgent)
 {
+	if (OwningAgent)
+	{
+		Agent = OwningAgent;
+	}
 }
 
 // Called when the game starts
@@ -26,6 +43,8 @@ void USteeringComponent::BeginPlay()
 
 	// ...
 	
+
+
 }
 
 
@@ -37,36 +56,201 @@ void USteeringComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAc
 	// ...
 }
 
-void USteeringComponent::UpdateForces()
+void USteeringComponent::UpdateForces(float DeltaTime)
 {
+	SteeringForce += /*(Seperation() * 10) + Alignment() + Cohesion() +*/ Wander();
+
+	if (SteeringForce.Size() > 0.0001f)
+	{
+		Acceleration = SteeringForce / Agent->GetMass();
+		Agent->SetDirection(Agent->GetDirection() + Acceleration * DeltaTime);
+
+		FVector NewLocation = Agent->GetActorLocation();
+
+		NewLocation += Agent->GetDirection() * DeltaTime;
+		Agent->SetActorLocation(NewLocation);
+
+		FRotator Rotation = UKismetMathLibrary::FindLookAtRotation(Agent->GetActorRotation().Vector(), Agent->GetDirection());
+		Agent->SetActorRotation(Rotation);
+
+		SteeringForce = FVector::ZeroVector;
+
+	}
+
 }
 
 FVector USteeringComponent::Seek(const FVector Target)
 {
-	return FVector();
+	FVector DesiredVelocity = FVector(Target - Agent->GetActorLocation());
+
+	DesiredVelocity = DesiredVelocity.GetSafeNormal();
+	DesiredVelocity *= Agent->GetMaxSpeed();
+
+
+	return (DesiredVelocity - Agent->GetDirection());
 }
 
 FVector USteeringComponent::Wander()
 {
-	return FVector();
+	WanderTheta += RandStream.FRandRange(-WanderJitterPerSecond, WanderJitterPerSecond);
+	FVector Heading = Agent->GetDirection().GetSafeNormal();
+
+	FVector CirclePos = Heading;
+	CirclePos *= WanderDist;
+	CirclePos += Agent->GetActorLocation();
+
+
+	float h = FMath::Acos(FVector::DotProduct(FVector::ZeroVector, Heading));
+	h = FMath::RadiansToDegrees(h);
+
+	float XOffset = CircleRadius * FMath::Cos(WanderTheta + h);
+	float YOffset = CircleRadius * FMath::Sin(WanderTheta + h);
+	float ZOffset = CircleRadius * FMath::Tan(WanderTheta + h);
+
+	FVector Target = CirclePos + FVector(XOffset, YOffset, ZOffset);
+
+	return Seek(Target);
 }
 
 FVector USteeringComponent::Seperation()
 {
-	return FVector();
+	FVector Sum;
+	int32 Count = 0;
+
+	for (int32 i = 0; i < Agent->GetNeighbors().Num(); i++)
+	{
+		FVector Loc = Agent->GetActorLocation();
+
+		auto OtherAgent = Agent->GetNeighbors()[i];
+		FVector OtherLoc = OtherAgent->GetActorLocation();
+
+		float Distance = FVector::Dist(Loc, OtherLoc);
+
+		if ((Distance > 0) && (Distance < DesiredSeparation))
+		{
+			FVector Difference = Loc - OtherLoc;
+			Difference = Difference.GetUnsafeNormal();
+			Difference /= Distance;
+			Sum += Difference;
+			Count++;
+		}
+	}
+
+	FVector SeperationForce = FVector::ZeroVector;
+
+	if (Count > 0)
+	{
+		Sum /= Count;
+		Sum = Sum.GetUnsafeNormal();
+		Sum *= Agent->GetMaxSpeed();
+		SeperationForce = Sum - Agent->GetDirection();
+	}
+
+
+	return SeperationForce;
 }
 
 FVector USteeringComponent::Alignment()
 {
-	return FVector();
+	int32 Count = 0;
+	FVector Sum;
+
+	for (int32 i = 0; i < Agent->GetNeighbors().Num(); i++)
+	{
+		FVector Loc = Agent->GetActorLocation();
+
+		auto OtherAgent = Agent->GetNeighbors()[i];
+		FVector OtherLoc = OtherAgent->GetActorLocation();
+
+		float Distance = FVector::Dist(Loc, OtherLoc);
+
+		if ((Distance > 0) && (Distance < DesiredAlignment) && Count < 30)
+		{
+			Sum += OtherAgent->GetDirection();
+			Count++;
+		}
+	}
+
+	FVector AlignmentForce = FVector::ZeroVector;
+
+	if (Count > 0)
+	{
+		Sum /= Count;
+		Sum = Sum.GetSafeNormal();
+		Sum *= Agent->GetMaxSpeed();
+		AlignmentForce = Sum - Agent->GetDirection();
+	}
+
+
+	return AlignmentForce;
 }
 
 FVector USteeringComponent::Cohesion()
 {
-	return FVector();
+	int32 Count = 0;
+	FVector Sum;
+
+	for (int32 i = 0; i < Agent->GetNeighbors().Num(); i++)
+	{
+		FVector Loc = Agent->GetActorLocation();
+
+		auto OtherAgent = Agent->GetNeighbors()[i];
+		FVector OtherLoc = OtherAgent->GetActorLocation();
+
+		float Distance = FVector::Dist(Loc, OtherLoc);
+
+		if ((Distance > 0) && (Distance < DesiredAlignment))
+		{
+			Sum += OtherLoc;
+			Count++;
+		}
+	}
+
+	FVector CohesionForce = FVector::ZeroVector;
+
+	if (Count > 0)
+	{
+		Sum /= Count;
+		CohesionForce = Seek(Sum);
+
+		return CohesionForce;
+	}
+	else
+	{
+		return CohesionForce;
+	}
 }
 
 void USteeringComponent::WrapAroundWorld()
 {
+	FVector Loc = Agent->GetActorLocation();
+
+	if (Loc.X < -2000)
+	{
+		Agent->SetActorLocation(FVector(2000, Loc.Y, Loc.Z));
+	}
+	else if (Loc.X > 2000)
+	{
+		Agent->SetActorLocation(FVector(-2000, Loc.Y, Loc.Z));
+	}
+
+	if (Loc.Y < -2000)
+	{
+		Agent->SetActorLocation(FVector(Loc.X, 2000, Loc.Z));
+	}
+	else if (Loc.Y > 2000)
+	{
+		Agent->SetActorLocation(FVector(Loc.X, -2000, Loc.Z));
+	}
+
+	if (Loc.Z < -2000)
+	{
+		Agent->SetActorLocation(FVector(Loc.X, Loc.Y, 2000));
+	}
+	else if (Loc.Z > 2000)
+	{
+		Agent->SetActorLocation(FVector(Loc.X, Loc.Y, -2000));
+	}
+
 }
 
