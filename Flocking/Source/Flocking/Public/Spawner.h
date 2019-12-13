@@ -24,10 +24,10 @@ public:
 	TArray<UOctTree*> TempTrees;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawning")
-	TArray<AActor*> SpawnedUnits;
+	TArray<AAgent*> SpawnedUnits;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawning")
-	TSubclassOf<AActor> ActorToBeSpawned;
+	TSubclassOf<AAgent> ActorToBeSpawned;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawning")
 	int32 NumToSpawn;
