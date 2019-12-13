@@ -5,6 +5,13 @@
 #include "DrawDebugHelpers.h"
 #include "Public\Spawner.h"
 
+
+FPoint::FPoint(FVector _Location, UObject* _Data)
+{
+	Location = _Location;
+	Data = _Data;
+}
+
 bool FRect::Contains(FPoint Node)
 {
 	if ((Node.Location.X >= (CenterLocation.X) - Size.X) && ((Node.Location.X <= (CenterLocation.X) + Size.X)) &&

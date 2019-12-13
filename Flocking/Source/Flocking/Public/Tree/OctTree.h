@@ -16,6 +16,9 @@ struct FPoint
 	GENERATED_USTRUCT_BODY()
 
 public:
+
+	FPoint(FVector, UObject*);
+
 	//keeping the location of the Point in 3d space
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Point")
 	FVector Location;

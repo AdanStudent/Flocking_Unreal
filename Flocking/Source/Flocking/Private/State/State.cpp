@@ -2,6 +2,7 @@
 
 
 #include "Public\State\State.h"
+#include "Public/Agent/Agent.h"
 
 void UFlocking::Enter(AActor* Owner)
 {

@@ -29,6 +29,11 @@ ASpawner::ASpawner()
 	}
 }
 
+void ASpawner::FillTree(FVector Location, UObject* Data)
+{
+	Tree->Insert(FPoint(Location, Data));
+}
+
 void ASpawner::SpawnActors()
 {
 	if (ActorToBeSpawned)
@@ -40,30 +45,36 @@ void ASpawner::SpawnActors()
 
 		for (int32 i = 0; i < NumToSpawn; i++)
 		{
+			AAgent* SpawnedAgent;
+
 			//Spawning Agent
-			FActorSpawnParameters sParameters;
-			sParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+			{
+				//Setting up Parameters for Spawning
+				FActorSpawnParameters sParameters;
+				sParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+				
+				//Determining its location
+				float range = Rand.FRandRange(1.f, 2000.f);
+				FVector Loc = Rand.GetUnitVector() * range;
 
-			float range = Rand.FRandRange(1.f, 2000.f);
+				//Spawning the AAgent
+				SpawnedAgent = GetWorld()->SpawnActor<AAgent>(ActorToBeSpawned, Loc, FRotator::ZeroRotator, sParameters);
 
-			FVector Loc = Rand.GetUnitVector() * range;
+				//Setting the Steering Component it has with reference to itself
+				SpawnedAgent->GetSteeringComp()->SetAgent(SpawnedAgent);
+			}
 
-			AAgent* Agent = GetWorld()->SpawnActor<AAgent>(ActorToBeSpawned, Loc, FRotator::ZeroRotator, sParameters);
-
-			Agent->GetSteeringComp()->SetAgent(Agent);
 
 			//Add Agent to the Agents list
-			SpawnedUnits.Add(Agent);
+			SpawnedUnits.Add(SpawnedAgent);
 
 			//Adding the point of the agent to list of agents
-			FPoint Point;
-
-			Point.Location = Agent->GetActorLocation();
-			Point.Data = Agent;
-
-			if (Tree->Insert(Point))
 			{
-				counter++;
+				if (Tree->Insert(FPoint(SpawnedAgent->GetActorLocation(), SpawnedAgent)))
+				{
+					//logging to make sure the correct amount of insertions is happening
+					counter++;
+				}
 			}
 		}
 
@@ -71,12 +82,16 @@ void ASpawner::SpawnActors()
 	}
 }
 
+
 // Called when the game starts or when spawned
 void ASpawner::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	//Setting the Tree's reference for the World's Level
 	Tree->NewMapWorld = GetWorld();
+	
+	//Spawning all the Actors
 	SpawnActors();
 
 	//FRandomStream Rand;

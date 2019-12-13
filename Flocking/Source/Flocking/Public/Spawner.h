@@ -7,6 +7,7 @@
 #include "Spawner.generated.h"
 
 class UOctTree;
+class AAgent;
 
 UCLASS()
 class FLOCKING_API ASpawner : public AActor
@@ -32,7 +33,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawning")
 	int32 NumToSpawn;
 
+	void FillTree(FVector Location, UObject* Data);
 	void SpawnActors();
+
 
 protected:
 	// Called when the game starts or when spawned
