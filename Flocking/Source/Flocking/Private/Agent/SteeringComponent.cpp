@@ -61,7 +61,7 @@ void USteeringComponent::UpdateForces(float DeltaTime)
 	if (Agent)
 	{
 
-		SteeringForce += /*(Seperation() * 10) + Alignment() + Cohesion() +*/ Wander();
+		SteeringForce += (Seperation() * 10) + Alignment() + Cohesion() + Wander();
 
 		if (SteeringForce.Size() > 0.0001f)
 		{

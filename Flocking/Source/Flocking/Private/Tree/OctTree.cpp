@@ -12,6 +12,12 @@ FPoint::FPoint(FVector _Location, UObject* _Data)
 	Data = _Data;
 }
 
+FRect::FRect(FVector _CenterLocation, FVector _Size)
+{
+	CenterLocation = _CenterLocation;
+	Size = _Size;
+}
+
 bool FRect::Contains(FPoint Node)
 {
 	if ((Node.Location.X >= (CenterLocation.X) - Size.X) && ((Node.Location.X <= (CenterLocation.X) + Size.X)) &&
@@ -49,12 +55,12 @@ void UOctTree::Display()
 	{
 		if (Boundary.bIsIntersected)
 		{
-			DrawDebugBox(NewMapWorld, Boundary.CenterLocation, Boundary.Size, Boundary.Color, true, -1.f, 0, 10);
+			DrawDebugBox(NewMapWorld, Boundary.CenterLocation, Boundary.Size, Boundary.Color, true, 0, 0, 10);
 
 
 			for (int32 i = 0; i < Nodes.Num(); i++)
 			{
-				DrawDebugPoint(NewMapWorld, Nodes[i].Location, 5, Boundary.Color, true, -1);
+				DrawDebugPoint(NewMapWorld, Nodes[i].Location, 5, Boundary.Color, true, 0);
 				//DrawDebugLine(NewMapWorld, Nodes[i].Location, Boundary.CenterLocation, Boundary.Color, true, -1.f, 0, 3);
 			}
 		}
@@ -111,7 +117,7 @@ bool UOctTree::Insert(FPoint ToBeAdded)
 
 }
 
-void UOctTree::Query(FRect Range, TArray<FPoint> &Found)
+void UOctTree::Query(FRect Range, TArray<UObject*> &Found)
 {
 	//if the Range does not intersect the Boundary then return
 	if (!Boundary.Intersects(Range))
@@ -124,7 +130,7 @@ void UOctTree::Query(FRect Range, TArray<FPoint> &Found)
 		{
 			if (Range.Contains(Nodes[i]))
 			{
-				Found.Push(Nodes[i]);
+				Found.Push(Nodes[i].Data);
 				Boundary.bIsIntersected = true;
 			}
 		}
@@ -172,10 +178,10 @@ int UOctTree::HowManyChildren()
 void UOctTree::Divide()
 {
 
-	if (!SpawnerRef || SpawnerRef->TempTrees.Num() < 7)
-	{
-		return;
-	}
+	//if (!SpawnerRef || SpawnerRef->TempTrees.Num() < 7)
+	//{
+	//	return;
+	//}
 
 	FVector NewSize = Boundary.Size;
 
@@ -233,9 +239,9 @@ void UOctTree::Divide()
 
 UOctTree* UOctTree::CreateChild(const FVector &NewSize)
 {
-	if (auto* Child = SpawnerRef->TempTrees.Pop())
+	if (auto* Child = NewObject<UOctTree>())
 	{
-		Child->SpawnerRef = SpawnerRef;
+		//Child->SpawnerRef = SpawnerRef;
 		Child->Capacity = Capacity;
 		Child->Boundary.Size = NewSize;
 		Child->NewMapWorld = NewMapWorld;

@@ -33,7 +33,14 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawning")
 	int32 NumToSpawn;
 
-	void FillTree(FVector Location, UObject* Data);
+private:
+
+	void RebuildTree();
+
+	void CheckForNearestNeighbors();
+	
+	void FillTree(UOctTree* Tree, FVector Location, UObject* Data);
+
 	void SpawnActors();
 
 

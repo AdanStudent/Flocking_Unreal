@@ -40,6 +40,9 @@ struct FRect
 	GENERATED_USTRUCT_BODY()
 
 public:
+
+	FRect(FVector _CenterLocation, FVector _Size);
+
 	//used to keep the location of where the center of the rect is being drawn
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Rect")
 	FVector CenterLocation;
@@ -131,7 +134,7 @@ public:
 	bool Insert(FPoint ToBeAdded);
 
 	//Used to find all nodes that interset with the Range, and returns a collection of all Found nodes
-	void Query(FRect Range, TArray<FPoint> &Found);
+	void Query(FRect Range, TArray<UObject*> &Found);
 
 	int HowManyChildren();
 

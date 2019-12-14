@@ -16,20 +16,28 @@ ASpawner::ASpawner()
 	PrimaryActorTick.bCanEverTick = true;
 
 	//some text here
-	Tree = CreateDefaultSubobject<UOctTree>(TEXT("Tree"));
-	Tree->SpawnerRef = this;
+	Tree = NewObject<UOctTree>();
+	//Tree->SpawnerRef = this;
 	Tree->Boundary.Size = FVector(2000);
 
 	//creating a list of empty OctTree's to be able to call from when a divide is called
-	for (int32 i = 0; i < 4096; i++)
-	{
-		FName name = FName("Child", i);
-		UOctTree* Temp = CreateDefaultSubobject<UOctTree>(name);
-		TempTrees.Add(Temp);
-	}
+	//for (int32 i = 0; i < 10000; i++)
+	//{
+	//	FName name = FName("Child", i);
+	//	UOctTree* Temp = CreateDefaultSubobject<UOctTree>(name);
+	//	TempTrees.Add(Temp);
+	//}
 }
 
-void ASpawner::FillTree(FVector Location, UObject* Data)
+void ASpawner::RebuildTree()
+{
+}
+
+void ASpawner::CheckForNearestNeighbors()
+{
+}
+
+void ASpawner::FillTree(UOctTree* Tree, FVector Location, UObject* Data)
 {
 	Tree->Insert(FPoint(Location, Data));
 }
@@ -41,7 +49,7 @@ void ASpawner::SpawnActors()
 		FRandomStream Rand;
 		Rand.GenerateNewSeed();
 
-		int counter = 0;
+		//int counter = 0;
 
 		for (int32 i = 0; i < NumToSpawn; i++)
 		{
@@ -73,12 +81,12 @@ void ASpawner::SpawnActors()
 				if (Tree->Insert(FPoint(SpawnedAgent->GetActorLocation(), SpawnedAgent)))
 				{
 					//logging to make sure the correct amount of insertions is happening
-					counter++;
+					//counter++;
 				}
 			}
 		}
 
-		UE_LOG(LogTemp, Warning, TEXT("Number of inserts: %d"), counter)
+		//UE_LOG(LogTemp, Warning, TEXT("Number of inserts: %d"), counter)
 	}
 }
 
@@ -95,6 +103,8 @@ void ASpawner::BeginPlay()
 	SpawnActors();
 
 
+
+
 }
 
 // Called every frame
@@ -102,5 +112,32 @@ void ASpawner::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	Tree = NewObject<UOctTree>();
+	Tree->Boundary.Size = FVector(2000);
+
+	for (int i = 0; i < SpawnedUnits.Num(); i++)
+	{
+		FillTree(Tree, SpawnedUnits[i]->GetActorLocation(), SpawnedUnits[i]);
+	}
+
+	for (int i = 0; i < SpawnedUnits.Num(); i++)
+	{
+		FRect Range = FRect(SpawnedUnits[i]->GetActorLocation(), FVector(750));
+
+		TArray<UObject*> FoundPoints;
+		Tree->Query(Range, FoundPoints);
+
+		TArray<AAgent*> FoundAgents;
+
+		for (int i = 0; i < FoundPoints.Num(); i++)
+		{
+			if (AAgent* Agent = Cast<AAgent>(FoundPoints[i]))
+			{
+				FoundAgents.Push(Agent);
+			}
+		}
+
+		SpawnedUnits[i]->SetNeighbors(FoundAgents);
+	}
 }
 
