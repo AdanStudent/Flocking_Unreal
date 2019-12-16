@@ -48,6 +48,8 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	void SetupTree();
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

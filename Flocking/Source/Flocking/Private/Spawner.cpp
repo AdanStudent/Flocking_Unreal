@@ -14,27 +14,26 @@ ASpawner::ASpawner()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
-	//some text here
-	Tree = NewObject<UOctTree>();
-	//Tree->SpawnerRef = this;
-	Tree->Boundary.Size = FVector(2000);
-
-	//creating a list of empty OctTree's to be able to call from when a divide is called
-	//for (int32 i = 0; i < 10000; i++)
-	//{
-	//	FName name = FName("Child", i);
-	//	UOctTree* Temp = CreateDefaultSubobject<UOctTree>(name);
-	//	TempTrees.Add(Temp);
-	//}
 }
 
 void ASpawner::RebuildTree()
 {
+	for (int i = 0; i < SpawnedUnits.Num(); i++)
+	{
+		FillTree(Tree, SpawnedUnits[i]->GetActorLocation(), SpawnedUnits[i]);
+	}
 }
 
 void ASpawner::CheckForNearestNeighbors()
 {
+	for (int i = 0; i < SpawnedUnits.Num(); i++)
+	{
+		FRect Range = FRect(SpawnedUnits[i]->GetActorLocation(), FVector(750));
+
+		TArray<UObject*> FoundPoints;
+		Tree->Query(Range, FoundPoints);
+		SpawnedUnits[i]->SetNeighbors(FoundPoints);
+	}
 }
 
 void ASpawner::FillTree(UOctTree* Tree, FVector Location, UObject* Data)
@@ -61,9 +60,9 @@ void ASpawner::SpawnActors()
 				FActorSpawnParameters sParameters;
 				sParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 				
+				float range = 2000;
 				//Determining its location
-				float range = Rand.FRandRange(1.f, 2000.f);
-				FVector Loc = Rand.GetUnitVector() * range;
+				FVector Loc = FVector(Rand.FRandRange(-range, range), Rand.FRandRange(-range, range), Rand.FRandRange(-range, range));
 
 				//Spawning the AAgent
 				SpawnedAgent = GetWorld()->SpawnActor<AAgent>(ActorToBeSpawned, Loc, FRotator::ZeroRotator, sParameters);
@@ -96,15 +95,20 @@ void ASpawner::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	//Setting the Tree's reference for the World's Level
-	Tree->NewMapWorld = GetWorld();
+	SetupTree();
 	
 	//Spawning all the Actors
 	SpawnActors();
+}
 
+void ASpawner::SetupTree()
+{
+	//some text here
+	Tree = NewObject<UOctTree>();
 
-
-
+	Tree->Boundary.Size = FVector(2000);
+	//Setting the Tree's reference for the World's Level
+	Tree->NewMapWorld = GetWorld();
 }
 
 // Called every frame
@@ -112,32 +116,10 @@ void ASpawner::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	Tree = NewObject<UOctTree>();
-	Tree->Boundary.Size = FVector(2000);
+	SetupTree();
+	RebuildTree();
+	CheckForNearestNeighbors();
 
-	for (int i = 0; i < SpawnedUnits.Num(); i++)
-	{
-		FillTree(Tree, SpawnedUnits[i]->GetActorLocation(), SpawnedUnits[i]);
-	}
 
-	for (int i = 0; i < SpawnedUnits.Num(); i++)
-	{
-		FRect Range = FRect(SpawnedUnits[i]->GetActorLocation(), FVector(750));
-
-		TArray<UObject*> FoundPoints;
-		Tree->Query(Range, FoundPoints);
-
-		TArray<AAgent*> FoundAgents;
-
-		for (int i = 0; i < FoundPoints.Num(); i++)
-		{
-			if (AAgent* Agent = Cast<AAgent>(FoundPoints[i]))
-			{
-				FoundAgents.Push(Agent);
-			}
-		}
-
-		SpawnedUnits[i]->SetNeighbors(FoundAgents);
-	}
 }
 

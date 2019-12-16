@@ -44,7 +44,7 @@ void AAgent::ClearNeighbors()
 	Neighbors.Empty();
 }
 
-void AAgent::SetNeighbors(TArray<AAgent*> OtherAgents)
+void AAgent::SetNeighbors(TArray<UObject*> OtherAgents)
 {
 	Neighbors = OtherAgents;
 }

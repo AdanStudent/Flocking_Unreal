@@ -4,6 +4,7 @@
 #include "Public\Agent\SteeringComponent.h"
 #include "Public\Agent\Agent.h"
 #include "Kismet\KismetMathLibrary.h"
+#include "DrawDebugHelpers.h"
 
 
 // Sets default values for this component's properties
@@ -61,7 +62,11 @@ void USteeringComponent::UpdateForces(float DeltaTime)
 	if (Agent)
 	{
 
-		SteeringForce += (Seperation() * 10) + Alignment() + Cohesion() + Wander();
+		SteeringForce += (Seperation() * 10); //red
+		SteeringForce += (Alignment()); // yello
+		SteeringForce += (Cohesion()); // green
+		SteeringForce += (Wander()); //blue
+
 
 		if (SteeringForce.Size() > 0.0001f)
 		{
@@ -117,7 +122,11 @@ FVector USteeringComponent::Wander()
 
 	FVector Target = CirclePos + FVector(XOffset, YOffset, ZOffset);
 
-	return Seek(Target);
+	FVector WanderForce = Seek(Target);
+	//DrawDebugDirectionalArrow(GetWorld(), Agent->GetActorLocation(), Agent->GetActorLocation() + WanderForce, 3, FColor::Blue, false, .5f, 0, 5);
+
+
+	return WanderForce;
 }
 
 FVector USteeringComponent::Seperation()
@@ -129,18 +138,20 @@ FVector USteeringComponent::Seperation()
 	{
 		FVector Loc = Agent->GetActorLocation();
 
-		auto OtherAgent = Agent->GetNeighbors()[i];
-		FVector OtherLoc = OtherAgent->GetActorLocation();
-
-		float Distance = FVector::Dist(Loc, OtherLoc);
-
-		if ((Distance > 0) && (Distance < DesiredSeparation))
+		if (auto OtherAgent = Cast<AAgent>(Agent->GetNeighbors()[i]))
 		{
-			FVector Difference = Loc - OtherLoc;
-			Difference = Difference.GetUnsafeNormal();
-			Difference /= Distance;
-			Sum += Difference;
-			Count++;
+			FVector OtherLoc = OtherAgent->GetActorLocation();
+
+			float Distance = FVector::Dist(Loc, OtherLoc);
+
+			if ((Distance > 0) && (Distance < DesiredSeparation))
+			{
+				FVector Difference = Loc - OtherLoc;
+				Difference = Difference.GetUnsafeNormal();
+				Difference /= Distance;
+				Sum += Difference;
+				Count++;
+			}
 		}
 	}
 
@@ -154,6 +165,7 @@ FVector USteeringComponent::Seperation()
 		SeperationForce = Sum - Agent->GetDirection();
 	}
 
+	DrawDebugLine(GetWorld(), Agent->GetActorLocation(), (Agent->GetActorLocation() + SeperationForce.GetSafeNormal() * 10), FColor::Red, false, .5f, 0, 0.5);
 
 	return SeperationForce;
 }
@@ -167,15 +179,17 @@ FVector USteeringComponent::Alignment()
 	{
 		FVector Loc = Agent->GetActorLocation();
 
-		auto OtherAgent = Agent->GetNeighbors()[i];
-		FVector OtherLoc = OtherAgent->GetActorLocation();
-
-		float Distance = FVector::Dist(Loc, OtherLoc);
-
-		if ((Distance > 0) && (Distance < DesiredAlignment) && Count < 30)
+		if (auto OtherAgent = Cast<AAgent>(Agent->GetNeighbors()[i]))
 		{
-			Sum += OtherAgent->GetDirection();
-			Count++;
+			FVector OtherLoc = OtherAgent->GetActorLocation();
+
+			float Distance = FVector::Dist(Loc, OtherLoc);
+
+			if ((Distance > 0) && (Distance < DesiredAlignment) && Count < 30)
+			{
+				Sum += OtherAgent->GetDirection();
+				Count++;
+			}
 		}
 	}
 
@@ -189,6 +203,7 @@ FVector USteeringComponent::Alignment()
 		AlignmentForce = Sum - Agent->GetDirection();
 	}
 
+	DrawDebugLine(GetWorld(), Agent->GetActorLocation(), (Agent->GetActorLocation() + AlignmentForce.GetSafeNormal() * 10), FColor::Yellow, false, .5f, 0, 0.5);
 
 	return AlignmentForce;
 }
@@ -202,15 +217,17 @@ FVector USteeringComponent::Cohesion()
 	{
 		FVector Loc = Agent->GetActorLocation();
 
-		auto OtherAgent = Agent->GetNeighbors()[i];
-		FVector OtherLoc = OtherAgent->GetActorLocation();
-
-		float Distance = FVector::Dist(Loc, OtherLoc);
-
-		if ((Distance > 0) && (Distance < DesiredAlignment))
+		if (auto OtherAgent = Cast<AAgent>(Agent->GetNeighbors()[i]))
 		{
-			Sum += OtherLoc;
-			Count++;
+			FVector OtherLoc = OtherAgent->GetActorLocation();
+
+			float Distance = FVector::Dist(Loc, OtherLoc);
+
+			if ((Distance > 0) && (Distance < DesiredAlignment))
+			{
+				Sum += OtherLoc;
+				Count++;
+			}
 		}
 	}
 
@@ -220,6 +237,7 @@ FVector USteeringComponent::Cohesion()
 	{
 		Sum /= Count;
 		CohesionForce = Seek(Sum);
+		DrawDebugLine(GetWorld(), Agent->GetActorLocation(), (Agent->GetActorLocation() + CohesionForce.GetSafeNormal() * 10), FColor::Green, false, .5f, 0, 0.5);
 
 		return CohesionForce;
 	}
@@ -232,32 +250,33 @@ FVector USteeringComponent::Cohesion()
 void USteeringComponent::WrapAroundWorld()
 {
 	FVector Loc = Agent->GetActorLocation();
+	float value = 2000;
 
-	if (Loc.X < -2000)
+	if (Loc.X < -value)
 	{
-		Agent->SetActorLocation(FVector(2000, Loc.Y, Loc.Z));
+		Agent->SetActorLocation(FVector(value, Loc.Y, Loc.Z));
 	}
-	else if (Loc.X > 2000)
+	else if (Loc.X > value)
 	{
-		Agent->SetActorLocation(FVector(-2000, Loc.Y, Loc.Z));
-	}
-
-	if (Loc.Y < -2000)
-	{
-		Agent->SetActorLocation(FVector(Loc.X, 2000, Loc.Z));
-	}
-	else if (Loc.Y > 2000)
-	{
-		Agent->SetActorLocation(FVector(Loc.X, -2000, Loc.Z));
+		Agent->SetActorLocation(FVector(-value, Loc.Y, Loc.Z));
 	}
 
-	if (Loc.Z < -2000)
+	if (Loc.Y < -value)
 	{
-		Agent->SetActorLocation(FVector(Loc.X, Loc.Y, 2000));
+		Agent->SetActorLocation(FVector(Loc.X, value, Loc.Z));
 	}
-	else if (Loc.Z > 2000)
+	else if (Loc.Y > value)
 	{
-		Agent->SetActorLocation(FVector(Loc.X, Loc.Y, -2000));
+		Agent->SetActorLocation(FVector(Loc.X, -value, Loc.Z));
+	}
+
+	if (Loc.Z < -value)
+	{
+		Agent->SetActorLocation(FVector(Loc.X, Loc.Y, value));
+	}
+	else if (Loc.Z > value)
+	{
+		Agent->SetActorLocation(FVector(Loc.X, Loc.Y, -value));
 	}
 
 }

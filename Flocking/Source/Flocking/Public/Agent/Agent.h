@@ -38,7 +38,7 @@ private:
 	TArray<class UState*> SteeringState;
 
 	UPROPERTY(EditAnywhere, Category = "Steering Behaviors")
-	TArray<AAgent*> Neighbors;
+	TArray<UObject*> Neighbors;
 
 	//Placeholder
 	//AIManager
@@ -58,7 +58,7 @@ public:
 
 	USteeringComponent* GetSteeringComp() { return SteeringComp; }
 
-	const TArray<AAgent*> GetNeighbors() { return Neighbors; }
+	const TArray<UObject*> GetNeighbors() { return Neighbors; }
 
 	FVector GetDirection() { return Direction; }
 	void SetDirection(FVector Value) { Direction = Value; }
@@ -70,7 +70,7 @@ public:
 	const float GetMaxSpeed() { return MaxSpeed; }
 	const float GetMaxForce() { return MaxForce; }
 
-	void SetNeighbors(TArray<AAgent*> OtherAgents);
+	void SetNeighbors(TArray<UObject*> OtherAgents);
 	void RunSteeringBehaviors();
 
 private:
