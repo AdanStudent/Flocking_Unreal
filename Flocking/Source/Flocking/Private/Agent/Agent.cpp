@@ -10,11 +10,12 @@ AAgent::AAgent()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	//Allocating memory for the SteeringComponent
 	SteeringComp = CreateDefaultSubobject<USteeringComponent>("Steering Comp");
 
+	//Setup mass and MaxSpeed
 	Mass = 10.f;
 	MaxSpeed = 1000.f;
-	MaxForce = 5000.f;
 }
 
 
@@ -30,13 +31,11 @@ void AAgent::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	
+	//Update all the steering behaviors
 	SteeringComp->UpdateForces(DeltaTime);
-	ClearNeighbors();
-}
 
-void AAgent::RunSteeringBehaviors()
-{
-	//used to call SteeringComp Run function
+	//Then clear all the Neighbors for next update
+	ClearNeighbors();
 }
 
 void AAgent::ClearNeighbors()

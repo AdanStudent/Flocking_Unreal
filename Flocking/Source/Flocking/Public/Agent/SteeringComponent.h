@@ -17,37 +17,48 @@ public:
 	USteeringComponent();
 
 private:
+	//Used to accumulate the Steering Behaviors
 	UPROPERTY(EditDefaultsOnly, Category = "Steering Behaviors")
 		FVector SteeringForce;
 
+	//Used for calculations with Steering Behaviors
 	UPROPERTY(EditDefaultsOnly, Category = "Steering Behaviors")
 		FVector Acceleration;
 
+	//Used to keep how far the wander range has adjusted
 	UPROPERTY(EditDefaultsOnly, Category = "Steering Behaviors")
 		float WanderTheta;
 
+	//the size of the imaginary sphere's radius being used to determine the wander's position
 	UPROPERTY(EditDefaultsOnly, Category = "Steering Behaviors")
 		float CircleRadius;
 
+	//how far away the sphere should be from the Agent
 	UPROPERTY(EditDefaultsOnly, Category = "Steering Behaviors")
 		float WanderDist;
 
+	//the range at which it would be randomly moving inbetween
 	UPROPERTY(EditDefaultsOnly, Category = "Steering Behaviors")
 		float WanderJitterPerSecond;
 
+	//the distance at which we will be checking for the Seperation function
 	UPROPERTY(EditDefaultsOnly, Category = "Steering Behaviors")
 		float DesiredSeparation;
 
+	//the distance at which we will be checking for the Alignment function
 	UPROPERTY(EditDefaultsOnly, Category = "Steering Behaviors")
 		float DesiredAlignment;
 
+	//the distance at which we will be checking for the Cohesion function
 	UPROPERTY(EditDefaultsOnly, Category = "Steering Behaviors")
 		float DesiredCohesion;
 
 public:
+	//a reference to the Agent that it will be moving
 	UPROPERTY(EditDefaultsOnly, Category = "Steering Behaviors")
 		class AAgent* Agent;
 
+	//used for various Random functions
 	FRandomStream RandStream;
 
 protected:

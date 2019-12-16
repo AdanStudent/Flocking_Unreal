@@ -14,7 +14,7 @@ USteeringComponent::USteeringComponent()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 
-
+	//setting the numbers for all these variables 
 	CircleRadius = 50;
 	WanderDist = 80;
 	WanderJitterPerSecond = 0.3f;
@@ -43,8 +43,6 @@ void USteeringComponent::BeginPlay()
 	Super::BeginPlay();
 
 	// ...
-	
-
 
 }
 
@@ -59,6 +57,7 @@ void USteeringComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAc
 
 void USteeringComponent::UpdateForces(float DeltaTime)
 {
+	//if there is an Agent set to this Component
 	if (Agent)
 	{
 
@@ -106,14 +105,13 @@ FVector USteeringComponent::Seek(const FVector Target)
 FVector USteeringComponent::Wander()
 {
 	WanderTheta += RandStream.FRandRange(-WanderJitterPerSecond, WanderJitterPerSecond);
-	FVector Heading = Agent->GetHeading();
-
-	FVector CirclePos = Heading;
+	
+	FVector CirclePos = Agent->GetHeading();
 	CirclePos *= WanderDist;
 	CirclePos += Agent->GetActorLocation();
 
 
-	float h = FMath::Acos(FVector::DotProduct(FVector::ZeroVector, Heading));
+	float h = FMath::Acos(FVector::DotProduct(FVector::ZeroVector, Agent->GetHeading()));
 	h = FMath::RadiansToDegrees(h);
 
 	float XOffset = CircleRadius * FMath::Cos(WanderTheta + h);
@@ -242,14 +240,18 @@ FVector USteeringComponent::Cohesion()
 
 void USteeringComponent::WrapAroundWorld()
 {
+	//get the Agent's current location
 	FVector Loc = Agent->GetActorLocation();
+	
+	//the bounds for how far it can go
 	float value = 5000;
 
+	//checking if the Agent's -x value is lower than the bound if so sent it to other side of the board
 	if (Loc.X < -value)
 	{
 		Agent->SetActorLocation(FVector(value, Loc.Y, Loc.Z));
 	}
-	else if (Loc.X > value)
+	else if (Loc.X > value) //or if the bound is greater than the upper bound the set it to the opposite side
 	{
 		Agent->SetActorLocation(FVector(-value, Loc.Y, Loc.Z));
 	}
