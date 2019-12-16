@@ -18,35 +18,42 @@ public:
 	// Sets default values for this actor's properties
 	ASpawner();
 
+	//Reference of OctTree to be built
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawning")
 	UOctTree* Tree;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawning")
-	TArray<UOctTree*> TempTrees;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawning")
-	TArray<AAgent*> SpawnedUnits;
-
+	//What AAgent based class should be spawned
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawning")
 	TSubclassOf<AAgent> ActorToBeSpawned;
 
+	//Collection of all Spawned Units
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawning")
+	TArray<AAgent*> SpawnedUnits;
+
+	//how many to spawn
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawning")
 	int32 NumToSpawn;
 
 private:
 
+	//go through all the SpawnedUnits and call FillTree for each
 	void RebuildTree();
 
+	//Query Tree for each of the Spawned Units
 	void CheckForNearestNeighbors();
 	
+	//Used to Call insert for the specified Tree, with the specific location and UObject*
 	void FillTree(UOctTree* Tree, FVector Location, UObject* Data);
 
+	//Spawning the Actors
 	void SpawnActors();
 
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	//used to allocate new memory for the tree this frame, with specified size 
 
 	void SetupTree();
 
