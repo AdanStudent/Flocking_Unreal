@@ -60,32 +60,43 @@ void USteeringComponent::UpdateForces(float DeltaTime)
 	//if there is an Agent set to this Component
 	if (Agent)
 	{
+		//Calculate Steering Behaviors and combine them
+		{
+			SteeringForce += (Seperation() * 10);
+			SteeringForce += (Alignment());
+			SteeringForce += (Cohesion());
+			SteeringForce += (Wander());
+		}
 
-		SteeringForce += (Seperation() * 10); 
-		SteeringForce += (Alignment()); 
-		SteeringForce += (Cohesion()); 
-		SteeringForce += (Wander()); 
-
-
+		//if the size of the SteeringForce vector is larger than 0.0001 to insure that no minute calculations are being done unnecessarily
 		if (SteeringForce.Size() > 0.0001f)
 		{
+			//Calculate its acceleration based on the other forces and the Agents Mass
 			Acceleration = SteeringForce / Agent->GetMass();
+			
+			//Set the Agents' Direction
 			Agent->SetDirection(Agent->GetDirection() + Acceleration * DeltaTime);
 
+			//Set Heading
 			Agent->SetHeading(Agent->GetDirection().GetSafeNormal());
 
+			//Get the Actor's Location
 			FVector NewLocation = Agent->GetActorLocation();
 
+			//Calculate what its new location will be and set it to that location
 			NewLocation += Agent->GetDirection() * DeltaTime;
 			Agent->SetActorLocation(NewLocation);
 
-			FRotator Rotation = UKismetMathLibrary::FindLookAtRotation(Agent->GetActorRotation().Vector(), Agent->GetDirection());
+			//Rotate the Agent based on the direction that its moving towards
+			FRotator Rotation = UKismetMathLibrary::FindLookAtRotation(Agent->GetActorRotation().Vector(), Agent->GetHeading());
 			Agent->SetActorRotation(Rotation);
 
+			//Zero out the SteeringForce so that it's calculated again next frame
 			SteeringForce = FVector::ZeroVector;
 
 		}
 
+		//check if the Agent would have moved out of the bound of the world
 		WrapAroundWorld();
 
 	}
@@ -98,18 +109,18 @@ FVector USteeringComponent::Seek(const FVector Target)
 	DesiredVelocity = DesiredVelocity.GetSafeNormal();
 	DesiredVelocity *= Agent->GetMaxSpeed();
 
-
 	return (DesiredVelocity - Agent->GetDirection());
 }
 
 FVector USteeringComponent::Wander()
 {
+	//WanderTheta is the change since the last frame + the range that it's being moved inbetween
 	WanderTheta += RandStream.FRandRange(-WanderJitterPerSecond, WanderJitterPerSecond);
 	
+	// Setting the Sphere in front of the Agent at a WanderDist away from it's location
 	FVector CirclePos = Agent->GetHeading();
 	CirclePos *= WanderDist;
 	CirclePos += Agent->GetActorLocation();
-
 
 	float h = FMath::Acos(FVector::DotProduct(FVector::ZeroVector, Agent->GetHeading()));
 	h = FMath::RadiansToDegrees(h);
