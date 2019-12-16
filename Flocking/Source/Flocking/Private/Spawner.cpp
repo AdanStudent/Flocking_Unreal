@@ -18,6 +18,7 @@ ASpawner::ASpawner()
 
 void ASpawner::RebuildTree()
 {
+	//for each of the spawned units send them to Fill Tree with the Tree to be added to, their location and a pointer to themselves
 	for (int i = 0; i < SpawnedUnits.Num(); i++)
 	{
 		FillTree(Tree, SpawnedUnits[i]->GetActorLocation(), SpawnedUnits[i]);
@@ -26,18 +27,22 @@ void ASpawner::RebuildTree()
 
 void ASpawner::CheckForNearestNeighbors()
 {
+	//for each of the spawned units query them based on their center location and a FRect of size 750
 	for (int i = 0; i < SpawnedUnits.Num(); i++)
 	{
 		FRect Range = FRect(SpawnedUnits[i]->GetActorLocation(), FVector(750));
 
 		TArray<UObject*> FoundPoints;
 		Tree->Query(Range, FoundPoints);
+
+		//Set all found points as neighors for the SpawnedUnit
 		SpawnedUnits[i]->SetNeighbors(FoundPoints);
 	}
 }
 
 void ASpawner::FillTree(UOctTree* Tree, FVector Location, UObject* Data)
 {
+	//Insert the Point into the specified tree
 	Tree->Insert(FPoint(Location, Data));
 }
 
@@ -76,16 +81,9 @@ void ASpawner::SpawnActors()
 			SpawnedUnits.Add(SpawnedAgent);
 
 			//Adding the point of the agent to list of agents
-			{
-				if (Tree->Insert(FPoint(SpawnedAgent->GetActorLocation(), SpawnedAgent)))
-				{
-					//logging to make sure the correct amount of insertions is happening
-					//counter++;
-				}
-			}
+			Tree->Insert(FPoint(SpawnedAgent->GetActorLocation(), SpawnedAgent));
+			
 		}
-
-		//UE_LOG(LogTemp, Warning, TEXT("Number of inserts: %d"), counter)
 	}
 }
 
@@ -95,6 +93,7 @@ void ASpawner::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	//Create a new tree
 	SetupTree();
 	
 	//Spawning all the Actors
@@ -106,7 +105,7 @@ void ASpawner::SetupTree()
 	//some text here
 	Tree = NewObject<UOctTree>();
 
-	Tree->Boundary.Size = FVector(2000);
+	Tree->Boundary.Size = FVector(5000);
 	//Setting the Tree's reference for the World's Level
 	Tree->NewMapWorld = GetWorld();
 }
@@ -116,8 +115,13 @@ void ASpawner::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	//Rebuild the tree
 	SetupTree();
+	
+	//Fill it with all the spawned units
 	RebuildTree();
+	
+	//Query the tree for each of the spawned units
 	CheckForNearestNeighbors();
 
 

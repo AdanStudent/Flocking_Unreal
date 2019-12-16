@@ -62,10 +62,10 @@ void USteeringComponent::UpdateForces(float DeltaTime)
 	if (Agent)
 	{
 
-		SteeringForce += (Seperation() * 10); //red
-		SteeringForce += (Alignment()); // yello
-		SteeringForce += (Cohesion()); // green
-		SteeringForce += (Wander()); //blue
+		SteeringForce += (Seperation() * 10); 
+		SteeringForce += (Alignment()); 
+		SteeringForce += (Cohesion()); 
+		SteeringForce += (Wander()); 
 
 
 		if (SteeringForce.Size() > 0.0001f)
@@ -123,8 +123,6 @@ FVector USteeringComponent::Wander()
 	FVector Target = CirclePos + FVector(XOffset, YOffset, ZOffset);
 
 	FVector WanderForce = Seek(Target);
-	//DrawDebugDirectionalArrow(GetWorld(), Agent->GetActorLocation(), Agent->GetActorLocation() + WanderForce, 3, FColor::Blue, false, .5f, 0, 5);
-
 
 	return WanderForce;
 }
@@ -165,8 +163,6 @@ FVector USteeringComponent::Seperation()
 		SeperationForce = Sum - Agent->GetDirection();
 	}
 
-	DrawDebugLine(GetWorld(), Agent->GetActorLocation(), (Agent->GetActorLocation() + SeperationForce.GetSafeNormal() * 10), FColor::Red, false, .5f, 0, 0.5);
-
 	return SeperationForce;
 }
 
@@ -203,8 +199,6 @@ FVector USteeringComponent::Alignment()
 		AlignmentForce = Sum - Agent->GetDirection();
 	}
 
-	DrawDebugLine(GetWorld(), Agent->GetActorLocation(), (Agent->GetActorLocation() + AlignmentForce.GetSafeNormal() * 10), FColor::Yellow, false, .5f, 0, 0.5);
-
 	return AlignmentForce;
 }
 
@@ -237,7 +231,6 @@ FVector USteeringComponent::Cohesion()
 	{
 		Sum /= Count;
 		CohesionForce = Seek(Sum);
-		DrawDebugLine(GetWorld(), Agent->GetActorLocation(), (Agent->GetActorLocation() + CohesionForce.GetSafeNormal() * 10), FColor::Green, false, .5f, 0, 0.5);
 
 		return CohesionForce;
 	}
@@ -250,7 +243,7 @@ FVector USteeringComponent::Cohesion()
 void USteeringComponent::WrapAroundWorld()
 {
 	FVector Loc = Agent->GetActorLocation();
-	float value = 2000;
+	float value = 5000;
 
 	if (Loc.X < -value)
 	{
